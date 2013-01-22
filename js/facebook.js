@@ -21,6 +21,7 @@ window.at_facebook = function( FB, $ ){
 	}
 
 	FB.Event.subscribe('auth.authResponseChange', function(response) {
+		console.log( response );
 		if( response.status === 'connected' && !Archetype.isUserLoggedIn() ) {
 			loginWithFacebook( response );
 		} else if( response.status === 'connected' ) {
@@ -36,6 +37,10 @@ window.at_facebook = function( FB, $ ){
 	$( '.at_fb_connect' ).click( function() {
 		var scope = $(this).data( 'scope' );
 		FB.login( function() {}, { scope: scope } );
-	})
+	});
+
+	if( _Archetype_FB && _Archetype_FB.reauth.length ) {
+		FB.login( function() {}, { scope: _Archetype_FB.scope } );
+	}
 
 }
