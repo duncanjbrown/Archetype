@@ -16,6 +16,11 @@ window.at_facebook = function( FB, $ ){
 		FB.login( function() {}, { scope: scope } );
 	});
 
+	$( '.at_fb_connect' ).click( function() {
+		var scope = $(this).data( 'scope' );
+		FB.login( function() {}, { scope: scope } );
+	})
+
 	FB.Event.subscribe('auth.authResponseChange', function(response) {
 		if( response.status === 'connected' ) {
 			loginWithFacebook( response );

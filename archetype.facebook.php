@@ -66,6 +66,15 @@ class Archetype_Facebook {
 	}
 
 	/**
+	 * Render a login button
+	 * @return void
+	 */
+	public static function connect_button( ) {
+		$fb = self::get_instance();
+		$fb->_connect_button();
+	}
+
+	/**
 	 * Get an instance of the Singleton
 	 * @return Archetype_Facebook
 	 */
@@ -193,6 +202,15 @@ class Archetype_Facebook {
 	 */
 	public function _login_button( $text = 'Log in with Facebook' ) {
 		include( 'views/fb_button.php' );
+	}
+
+	/**
+	 * Display the login button
+	 * @param string $text
+	 * @return void
+	 */
+	public function _connect_button( $text = 'Connect in with Facebook' ) {
+		include( 'views/fb_connect_button.php' );
 	}
 
 	/**

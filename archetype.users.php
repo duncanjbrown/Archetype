@@ -357,6 +357,14 @@ class User {
 		return $id;
 	}
 
+	/**
+	 * Is this user connected to Facebook?
+	 * @return boolean 
+	 */
+	public function has_facebook() {
+		return (bool) $this->get_meta( AT_FB_ID_META );
+	}
+
 
 }
 
