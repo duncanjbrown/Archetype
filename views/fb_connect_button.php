@@ -1,0 +1,1 @@
+<div class="at_fb_connect connect facebook" data-scope="<?php echo $this->get_perms(); ?>"><?php echo $text; ?></div>
