@@ -15,6 +15,7 @@ add_action( 'init', function() {
 	) );
 });
 
+include( 'archetype.posts.php' );
 include( 'archetype.functions.php' );
 include( 'archetype.users.php' );
 include( 'archetype.users.admin.php' );
