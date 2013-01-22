@@ -157,7 +157,7 @@ class Archetype_Facebook {
 	 * @param  array $response the data from Facebook
 	 * @return  void
 	 */
-	private static function bind_user( User $user, $response ) {
+	public static function bind_user( User $user, $response ) {
 		$user->update_meta( AT_FB_ID_META, $response['id'] );
 		$user->update_meta( AT_FB_TOKEN_META, $response['token'] );
 		$user->update_meta( AT_FB_TOKEN_EXPIRES, $response['expires'] );
@@ -209,7 +209,7 @@ class Archetype_Facebook {
 	 * @param string $text
 	 * @return void
 	 */
-	public function _connect_button( $text = 'Connect in with Facebook' ) {
+	public function _connect_button( $text = 'Connect with Facebook' ) {
 		include( 'views/fb_connect_button.php' );
 	}
 
@@ -280,13 +280,25 @@ add_action( 'init', function() {
 /**
  * Handle AJAX callbacks from the JS SDK
  */
-add_action( 'wp_ajax_fb_login', 'fb_login' );
-add_action( 'wp_ajax_nopriv_fb_login', 'fb_login' );
+add_action( 'wp_ajax_nopriv_fb_login', 'at_fb_login' );
 
-function fb_login() {
+function at_fb_login() {
 	$response = Archetype_Facebook::parse_fb_postdata( $_POST['response'] );
 	$user = Archetype_Facebook::find_or_create_user( $response );
 	$user->login();
+	at_ajax_response( array( 'answer' => 'yes' ) );
+}
+
+add_action( 'wp_ajax_fb_connect', 'at_fb_connect' );
+
+/**
+ * Connect the currently logged in user to Facebook
+ * @return void      
+ */
+function at_fb_connect( ) {
+	$user = User::current_user(); // not hooked to nopriv_ so user is def. present
+	$response = Archetype_Facebook::parse_fb_postdata( $_POST['response'] );
+	$user = Archetype_Facebook::bind_user( $user, $response );
 	at_ajax_response( array( 'answer' => 'yes' ) );
 }
 

@@ -8,8 +8,11 @@ define( 'AT_PLUGIN_URL', trailingslashit( plugin_dir_url( __FILE__ ) ) );
 
 add_action( 'init', function() {
 	wp_enqueue_script( 'jquery' );
-	wp_enqueue_script( 'at_wp_js', AT_PLUGIN_URL . 'js/archetype.wp.js' );
-	wp_localize_script( 'at_wp_js', 'at_wp_js', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) ); 
+	wp_enqueue_script( 'archetype_js', AT_PLUGIN_URL . 'js/archetype.wp.js' );
+	wp_localize_script( 'archetype_js', '_Archetype', array( 
+		'ajaxurl' => admin_url( 'admin-ajax.php' ),
+	 	'isUserLoggedIn' => is_user_logged_in()
+	) );
 });
 
 include( 'archetype.functions.php' );
