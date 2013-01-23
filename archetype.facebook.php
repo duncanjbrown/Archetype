@@ -193,7 +193,7 @@ class Archetype_Facebook {
 
 		$user->update_meta( AT_FB_ID_META, $response['id'] );
 		$user->update_meta( AT_FB_TOKEN_META, $long_token['token'] );
-		$user->update_meta( AT_FB_TOKEN_EXPIRES, $long_token['expires'] );
+		$user->update_meta( AT_FB_TOKEN_EXPIRES, $long_token['expires'] + time() );
 	}
 
 	/**
