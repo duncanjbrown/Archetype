@@ -39,8 +39,4 @@ window.at_facebook = function( FB, $ ){
 		FB.login( function() {}, { scope: scope } );
 	});
 
-	if( _Archetype_FB && _Archetype_FB.reauth.length ) {
-		FB.login( function() {}, { scope: _Archetype_FB.scope } );
-	}
-
 }

@@ -30,6 +30,12 @@ class Archetype_Facebook {
 	private static $_instance = false;
 
 	/**
+	 * Static flag if we're reauthing so we don't hook up the reauth flow twice
+	 * @var boolean
+	 */
+	private static $reauth = false;
+
+	/**
 	 * The facebook sdk object
 	 *
 	 * @var Facebook
@@ -81,6 +87,16 @@ class Archetype_Facebook {
 	public static function connect_button( ) {
 		$fb = self::get_instance();
 		$fb->_connect_button();
+	}
+
+	/**
+	 * Render a login button
+	 *
+	 * @return void
+	 */
+	public static function reauth_button( ) {
+		$fb = self::get_instance();
+		$fb->_reauth_button();
 	}
 
 	/**
@@ -172,9 +188,12 @@ class Archetype_Facebook {
 	 * @return  void
 	 */
 	public static function bind_user( User $user, $response ) {
+
+		$long_token = self::get_long_lived_access_token( $response['token'] );
+
 		$user->update_meta( AT_FB_ID_META, $response['id'] );
-		$user->update_meta( AT_FB_TOKEN_META, $response['token'] );
-		$user->update_meta( AT_FB_TOKEN_EXPIRES, $response['expires'] );
+		$user->update_meta( AT_FB_TOKEN_META, $long_token['token'] );
+		$user->update_meta( AT_FB_TOKEN_EXPIRES, $long_token['expires'] );
 	}
 
 	/**
@@ -200,6 +219,23 @@ class Archetype_Facebook {
 		$this->get_userinfo();
 	}
 
+	public static function get_long_lived_access_token( $old_token ) {
+
+		$id = AT_FB_ID;
+		$secret = AT_FB_SECRET;
+
+		$url = "https://graph.facebook.com/oauth/access_token?client_id={$id}&client_secret={$secret}&grant_type=fb_exchange_token&fb_exchange_token={$old_token}";
+
+    	$response = curl_get_file_contents( $url );
+
+    	parse_str( $response, $result );
+
+    	return array( 
+    		'token' => $result['access_token'],
+    		'expires' => $result['expires']
+    		);
+	}
+
 	/**
 	 * Set the access token for this api session
 	 *
@@ -219,8 +255,35 @@ class Archetype_Facebook {
 		try {
 			return $this->facebook->api( '/me' );
 		} catch( Exception $e ) { 
-			wp_localize_script( 'archetype_js', '_Archetype_FB', array( 'reauth' => true, 'scope' => $this->get_perms() ) );
+
+			if( self::$reauth === true ) // only do this once
+				return;
+
+			self::$reauth = true;
+			$this->nag_to_reauth();
+			//wp_localize_script( 'archetype_js', '_Archetype_FB', array( 'reauth' => true, 'scope' => $this->get_perms() ) );
 		}
+	}
+
+	/**
+	 * Show a message reminding the user they need to reconnect with FB
+	 * @return [type] [description]
+	 */
+	public function nag_to_reauth() {
+		tn_add_static_message( 'error', 'Your Facebook account needs to be reconnected. Visit your settings page to fix it.' );
+	}
+
+	/**
+	 * @secrettodo make all these buttons static methods
+	 */
+
+	/**
+	 * Show a button inviting the user to refresh their connection with FB
+	 * @return void 
+	 */
+	public function _reauth_button() {
+		if( self::$reauth )
+			$this->_connect_button( 'Reconnect with Facebook' );
 	}
 
 	/**
@@ -234,7 +297,7 @@ class Archetype_Facebook {
 	}
 
 	/**
-	 * Display the login button
+	 * Display the connect button
 	 *
 	 * @param string  $text
 	 * @return void
@@ -270,6 +333,17 @@ class Archetype_Facebook {
 		include 'views/fb_channel.php';
 	}
 }
+
+  function curl_get_file_contents($URL) {
+    $c = curl_init();
+    curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($c, CURLOPT_URL, $URL);
+    $contents = curl_exec($c);
+    $err  = curl_getinfo($c,CURLINFO_HTTP_CODE);
+    curl_close($c);
+    if ($contents) return $contents;
+    else return FALSE;
+  }
 
 /**
  * Options page
