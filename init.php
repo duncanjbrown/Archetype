@@ -11,6 +11,7 @@ add_action( 'init', function() {
 	wp_enqueue_script( 'archetype_js', AT_PLUGIN_URL . 'js/archetype.wp.js' );
 	wp_localize_script( 'archetype_js', '_Archetype', array( 
 		'ajaxurl' => admin_url( 'admin-ajax.php' ),
+		'shortinit' => AT_PLUGIN_URL . 'ajax/shortinit.php',
 	 	'isUserLoggedIn' => is_user_logged_in()
 	) );
 });
