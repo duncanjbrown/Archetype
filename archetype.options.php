@@ -219,11 +219,24 @@ class Archetype_Options_Page_Text_Field extends Archetype_Options_Page_Field {
 	}
 }
 
-class AT_Options_Page_Checkbox_Field extends Archetype_Options_Page_Field {
+class Archtype_Options_Page_Checkbox_Field extends Archetype_Options_Page_Field {
 
 	function render( $args ) {
 		$opt = get_option( $this->slug );
 		include( 'views/admin_fields/checkbox_field.php' );
+	}
+
+}
+class Archtype_Options_Page_Checkbox_Array extends Archetype_Options_Page_Field {
+
+	function __construct( $args ) {
+		parent::__construct( $args );
+		$this->choices = $args['choices'];
+	}
+
+	function render( $args ) {
+		$opt = get_option( $this->slug );
+		include( 'views/admin_fields/checkbox_field_array.php' );
 	}
 
 }
