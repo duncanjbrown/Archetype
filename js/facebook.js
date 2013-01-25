@@ -13,7 +13,7 @@ window.at_facebook = function( FB, $ ){
 
 	function connectWithFacebook( facebookResponse ) {
 		Archetype.post( 'fb_connect', { response: facebookResponse }, function() {
-			messageBox.text( 'Connecting in...' );
+			messageBox.text( 'Connecting to Facebook...' );
 			setTimeout( function() {
 				window.location = window.location;
 			}, 500 );
