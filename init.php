@@ -25,6 +25,8 @@ include( 'archetype.messages.php' );
 include( 'archetype.routes.php' );
 include( 'archetype.facebook.php' );
 include( 'archetype.users.email-auth.php' );
+include( 'archetype.users.frontend.php' );
+
 
 add_action( 'admin_menu', function() {
 

@@ -134,10 +134,12 @@ class Archetype_Facebook {
 
 	/**
 	 * Find a user by their FB ID
+	 * @param string $fb_id
+	 * @param string $fb_token (optional)
 	 *
-	 * @return User
+	 * @return mixed User|false
 	 */
-	public static function find_user( $fb_id ) {
+	public static function find_user( $fb_id, $fb_token = false ) {
 
 		$user = get_users( array(
 				'meta_key' => AT_FB_ID_META,
@@ -145,11 +147,23 @@ class Archetype_Facebook {
 				'number' => 1
 			) );
 
-		if ( empty( $user ) )
-			return false;
+		// found a user by FB ID - return them
+		if( !empty( $user ) ) {
+			$_user = array_pop( $user );
+			return User::get( $_user->ID );
+		}
 
-		$_user = array_pop( $user );
-		return User::get( $_user->ID );
+		// try using the token to find out their email
+		if ( $fb_token ) {
+			$fb = self::get_instance();
+			$fb->set_access_token( $fb_token );
+			$details = $fb->get_userinfo();
+			if( $user = User::get_by_email( $details['email'] ) )
+				return $user;
+		}
+
+		// no dice
+		return false;
 	}
 
 	/**
@@ -180,18 +194,23 @@ class Archetype_Facebook {
 		return $user;
 	}
 
+	public static function create_local_user() {
+
+	}
+
 	/**
 	 * Associate a WP user with a set of FB data
 	 *
 	 * @param User    $user
-	 * @param array   $response the data from Facebook
+	 * @param string   $fb_id the Facebook user ID
+	 * @param string   $token the Facebook access token
 	 * @return  void
 	 */
-	public static function bind_user( User $user, $response ) {
+	public static function bind_user( User $user, $fb_id, $token ) {
 
-		$long_token = self::get_long_lived_access_token( $response['token'] );
+		$long_token = self::get_long_lived_access_token( $token );
 
-		$user->update_meta( AT_FB_ID_META, $response['id'] );
+		$user->update_meta( AT_FB_ID_META, $fb_id );
 		$user->update_meta( AT_FB_TOKEN_META, $long_token['token'] );
 		$user->update_meta( AT_FB_TOKEN_EXPIRES, $long_token['expires'] + time() );
 	}
@@ -403,10 +422,21 @@ add_action( 'init', function() {
 add_action( 'wp_ajax_nopriv_fb_login', 'at_fb_login' );
 
 function at_fb_login() {
+
 	$response = Archetype_Facebook::parse_fb_postdata( $_POST['response'] );
-	$user = Archetype_Facebook::find_or_create_user( $response );
-	$user->login();
-	at_ajax_response( array( 'answer' => 'yes' ) );
+	
+	if( $user = Archetype_Facebook::find_user( $response['id'], $response['token'] ) ) {
+		Archetype_Facebook::bind_user( $user, $response['id'], $response['token'] );
+		$user->login();
+		at_ajax_response( array(
+			'newUser' => false
+		) );
+	} else {
+		at_ajax_response( array( 
+			'newUser' => true,
+			'facebookData' => $response
+		) );
+	}
 }
 
 add_action( 'wp_ajax_fb_connect', 'at_fb_connect' );

@@ -1,27 +1,18 @@
 window.at_facebook = function( FB, $ ){
 
-	var messageBox = $( '#fb_result' );
-
 	function loginWithFacebook( facebookResponse ) {
-		Archetype.post( 'fb_login', { response: facebookResponse }, function() {
-			messageBox.text( 'Logging in...' );
-			setTimeout( function() {
-				window.location = window.location;
-			}, 500 );
+		Archetype.post( 'fb_login', { response: facebookResponse }, function( result ) {
+			$( document ).trigger( 'Archetype_FB_Login', result );
 		});
 	}
 
 	function connectWithFacebook( facebookResponse ) {
-		Archetype.post( 'fb_connect', { response: facebookResponse }, function() {
-			messageBox.text( 'Connecting to Facebook...' );
-			setTimeout( function() {
-				window.location = window.location;
-			}, 500 );
+		Archetype.post( 'fb_connect', { response: facebookResponse }, function( result ) {
+			$( document ).trigger( 'Archetype_FB_Connect', result );
 		});
 	}
 
 	FB.Event.subscribe('auth.authResponseChange', function(response) {
-		console.log( response );
 		if( response.status === 'connected' && !Archetype.isUserLoggedIn() ) {
 			loginWithFacebook( response );
 		} else if( response.status === 'connected' ) {

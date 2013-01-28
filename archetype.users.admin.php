@@ -6,7 +6,10 @@
 
 define( 'AT_USER_NONCE', '_at_update_user_profile' );
 
-class AT_UserProfile {
+/**
+ * Frontend profile fields
+ */
+class Archetype_UserProfile {
 
 	/**
 	 *
@@ -40,7 +43,7 @@ class AT_UserProfile {
 
 	/**
 	 * Handle form submission and updating metadata for a custom user profile page.
-	 * You need to provide the form yourself and register fields with at_add_profile_field()
+	 * You need to provide the form yourself and register fields with at_register_profile_field()
 	 *
 	 * @param int     $user_id the user in question
 	 * @param int     $nonce   the nonce for the form
@@ -226,33 +229,6 @@ class AT_UserProfile {
 
 }
 
-/*
-
-add_action( 'init', function() {
-		at_register_profile_field( 'first_name' );
-		at_register_profile_field( 'password' );
-		at_register_profile_field( 'last_name' );
-		at_register_profile_checkbox_field( 'at_receive_roundup' );
-		at_register_profile_field_array( 'used_services' );
-		at_register_profile_field( 'at_timezone' );
-		at_register_profile_field( 'at_receive_roundup' );
-	} ); */
-
-/**
- * On WP loaded, parse any posted fields against the current user id
- *
- * @todo move this over to AT_Frontend_Submission
- */
-add_action( 'wp', function() {
-
-		if ( !is_user_logged_in() )
-			return;
-
-		$user_id = get_current_user_id();
-		$profile_fields = new AT_UserProfile( $user_id, AT_USER_NONCE );
-
-	} );
-
 /**
  * Add a profile field
  *
@@ -289,14 +265,16 @@ function at_register_profile_checkbox_field( $field ) {
 	} );
 }
 
-
+/**
+ * Fields in the back end
+ */
 
 /**
- * Add fields to the user admin area by instatiating and/or extending this class
+ * Add fields to the user profile area by extending this class
  *
- * @package AT_Users
+ * @package Archetype_Users
  */
-class AT_User_Admin_Field {
+abstract class Archetype_User_Field {
 
 	/**
 	 *
@@ -315,6 +293,12 @@ class AT_User_Admin_Field {
 	protected $slug;
 
 	/**
+	 * Other options - validation etc
+	 * @var array
+	 */
+	protected $opts;
+
+	/**
 	 *
 	 *
 	 * @var $meta_key the usermeta key this field will work on
@@ -331,30 +315,67 @@ class AT_User_Admin_Field {
 	protected $desc;
 
 	/**
-	 * Add a new field to the user-admin page
+	 * Add a new field to the user-admin page or the front end
 	 * Hook this on admin_init.
 	 *
 	 * @param string  $name        the name of the profile field
 	 * @param string  $description the field's description to display alongside it
 	 * @param string  $meta_key    the usermeta key under which you'll store this data
 	 */
-	function __construct( $name, $description, $meta_key ) {
-
+	function __construct( $name, $description, $meta_key, $opts = array() ) {
 		$this->name = $name;
 		$this->slug = sanitize_title( $name );
 		$this->desc = $description;
 
+		$defaults = array( 
+			'validation' => '__return_true',
+			'required_for_signup' => false,
+			'show_in_signup' => false,
+			'signup_only' => false 
+		);
+
+		$opts = wp_parse_args( $opts, $defaults );
+		$this->opts = $opts;
 		$this->meta_key = $meta_key;
 
-		add_action( 'show_user_profile', array( &$this, 'show_field' ) );
-		add_action( 'edit_user_profile', array( &$this, 'show_field' ) );
-		add_action( 'personal_options_update', array( &$this, 'save' ) );
-		add_action( 'edit_user_profile_update', array( &$this, 'save' ) );
+		if( $opts['show_in_signup'] || $opts['signup_only'] )
+			$this->register_as_signup_field();
+
+		if( !$opts['signup_only'] )
+			$this->attach_hooks();
 	}
 
 	/**
+	 * Hook this field up to the signup form
+	 * @return void 
+	 */
+	private function register_as_signup_field() {
+		add_filter( 'at_signup_fields', function( $fields ) {
+			$fields[] = $this;
+			return $fields;
+		} );
+	}
+
+	/**
+	 * Get the posted value for this field if there is one
+	 * @return mixed field data, or false
+	 */
+	public function get_posted_value() {
+		if( isset( $_POST[$this->slug] ) ) 
+			return $_POST[$this->slug];
+
+		return false;
+	}
+
+	/**
+	 * Set up the hooks for displaying and saving this field
+	 * @return void 
+	 */
+	abstract function attach_hooks();
+
+	/**
 	 * Update the usermeta on the profile page save action
-	 * For internal wp use
+	 * Won't save if the validation doesn't return true
 	 *
 	 * @param int     $user_id the ID of the user to update (supplied by WP)
 	 */
@@ -366,6 +387,12 @@ class AT_User_Admin_Field {
 		$user = User::get( $user_id );
 
 		$value = sanitize_text_field( $_POST[$this->meta_key] );
+
+		$valid = call_user_func( $this->opts['validation'],  $value );
+
+		if( !$valid )
+			return;
+
 		$user->update_meta( $this->meta_key, $value );
 	}
 
@@ -416,11 +443,21 @@ class AT_User_Admin_Field {
 
 }
 
+class Archetype_User_Admin_Field extends Archetype_User_Field {
+
+	function attach_hooks() {
+		add_action( 'show_user_profile', array( &$this, 'show_field' ) );
+		add_action( 'edit_user_profile', array( &$this, 'show_field' ) );
+		add_action( 'personal_options_update', array( &$this, 'save' ) );
+		add_action( 'edit_user_profile_update', array( &$this, 'save' ) );
+	}
+}
+
 /**
  * Implement checkboxes for the User Admin page
  *
  */
-class AT_User_Admin_Checkbox_Field extends AT_User_Admin_Field {
+class Archetype_User_Admin_Checkbox_Field extends Archetype_User_Admin_Field {
 
 	/**
 	 * Show the field using an include
@@ -455,16 +492,16 @@ class AT_User_Admin_Checkbox_Field extends AT_User_Admin_Field {
 
 }
 
-class AT_User_Admin_Select_Field extends AT_User_Admin_Field {
+class Archetype_User_Admin_Select_Field extends Archetype_User_Admin_Field {
 
 	protected $options_callback;
 
 	/**
-	 * As AT_User_Admin_Field, except takes an extra arg to supply the options for the select
+	 * As Archetype_User_Admin_Field, except takes an extra arg to supply the options for the select
 	 * in 'value' => 'description' format
 	 */
-	function __construct( $name, $desc, $key, $options_callback ) {
-		parent::__construct( $name, $desc, $key );
+	function __construct( $name, $desc, $key, $callback, $options_callback ) {
+		parent::__construct( $name, $desc, $key, $callback );
 		$this->options_callback = $options_callback;
 	}
 
@@ -475,55 +512,37 @@ class AT_User_Admin_Select_Field extends AT_User_Admin_Field {
 
 }
 
+
 /**
- * Add a button to the user's profile that fires a callback on pressing
+ * On WP loaded, parse any posted fields against the current user id
+ *
+ * @todo move this over to AT_Frontend_Submission
  */
-class AT_User_Admin_Button extends AT_User_Admin_Field {
+add_action( 'wp', function() {
 
-	function __construct( $name, $desc, $callback ) {
-		parent::__construct( $name, $desc, false );
-		$this->name = $name;
-		$this->callback = $callback;
-	}
+	if ( !is_user_logged_in() )
+		return;
 
-	public function show_field( $user ) {
-		include 'views/admin_button.php';
-	}
+	$user_id = get_current_user_id();
+	//new Archetype_UserProfile( $user_id, AT_USER_NONCE );
 
-	/**
-	 * Fire the button action instead of saving
-	 *
-	 * @param int     $user_id the ID of the user to update (supplied by WP)
-	 */
-	public function save( $user_id ) {
-
-		if ( !current_user_can( 'edit_user', $user_id ) || !current_user_can( 'administrator' ) )
-			return false;
-
-		$user = AT_User::get( $user_id );
-
-		if( isset( $_POST[$this->slug] ) && $_POST[$this->slug] ) {
-			call_user_func( $this->callback, $user );
-		}
-	}
-
-}
+} );
 
 if ( is_admin() ) {
 
 	add_action( 'admin_init', function() {
-			//new AT_User_Admin_Field( 'Credit limit', 'The user\'s credit limit', 'at_credit_limit' );
-			/*new AT_User_Admin_Field( 'Tab total', 'How much the user has on their tab', 'at_tab' );
-			new AT_User_Admin_Field( 'Credit limit', 'The user\'s credit limit', 'at_credit_limit' );
-			new AT_User_Admin_Checkbox_Field( 'Completed Signup', 'Has the user completed signup?', 'at_completed_signup' );
-			new AT_User_Admin_Checkbox_Field( 'Taken Tour', 'Has the user taken the tour?', at_TOUR_META );
-			new AT_User_Admin_Checkbox_Field( 'Receive roundup', 'Should the user receive the roundup email?', 'at_receive_roundup' );
-			new AT_User_Admin_Select_Field( 'Timezone', 'What timezone is this user in?', 'at_timezone', 'at_get_timezone_array' );
-			new AT_User_Admin_Button( 'Send a test welcome email', '', function( $user ) { 
+			//new Archetype_User_Field( 'Credit limit', 'The user\'s credit limit', 'at_credit_limit' );
+			new Archetype_User_Admin_Field( 'Field X', 'My Field X', 'at_tab' );
+			/*new Archetype_User_Field( 'Credit limit', 'The user\'s credit limit', 'at_credit_limit' );
+			new Archetype_User_Admin_Checkbox_Field( 'Completed Signup', 'Has the user completed signup?', 'at_completed_signup' );
+			new Archetype_User_Admin_Checkbox_Field( 'Taken Tour', 'Has the user taken the tour?', at_TOUR_META );
+			new Archetype_User_Admin_Checkbox_Field( 'Receive roundup', 'Should the user receive the roundup email?', 'at_receive_roundup' );
+			new Archetype_User_Admin_Select_Field( 'Timezone', 'What timezone is this user in?', 'at_timezone', 'at_get_timezone_array' );
+			new Archetype_User_Admin_Button( 'Send a test welcome email', '', function( $user ) { 
 				add_filter( 'at_send_admin_notifications', '__return_false' );
 				wp_new_user_notification( $user->get_id() ); 
 			} );
-			new AT_User_Admin_Button( 'Send a test roundup email', '', function( $user ) { 
+			new Archetype_User_Admin_Button( 'Send a test roundup email', '', function( $user ) { 
 				$date = at_normalize_date( date( 'd/m/Y', time() ) );
 				$edition = AT_Edition::get_by_date( $date );
 				if( !$edition )
@@ -531,21 +550,21 @@ if ( is_admin() ) {
 				add_filter( 'wp_mail_content_type', function () { return "text/html"; } );
 				$user->send_email( 'The Daily Mix', $edition->get_daily_roundup( $user ) ); 
 			} );
-			new AT_User_Admin_Button( 'Send a test credit warning', '', function( $user ) { 
+			new Archetype_User_Admin_Button( 'Send a test credit warning', '', function( $user ) { 
 				$user->warn_low_credit();
 			} );
-			new AT_User_Admin_Button( 'Send a test end of sub email', '', function( $user ) { 
+			new Archetype_User_Admin_Button( 'Send a test end of sub email', '', function( $user ) { 
 				$sub = $user->get_sub();
 				$user->send_email( 'Your subscription has been cancelled', $sub->get_sub_cancelled_email() );
 			} );
-			new AT_User_Admin_Button( 'Send a test mailing list mail', '', function( $user ) { 
+			new Archetype_User_Admin_Button( 'Send a test mailing list mail', '', function( $user ) { 
 				$user->send_email( 'Welcome to the Daily Mix', $user->get_new_mailing_list_sub_email() );
 			} );
-			new AT_User_Admin_Button( 'Send a test trial sub warning email', '', function( $user ) {
+			new Archetype_User_Admin_Button( 'Send a test trial sub warning email', '', function( $user ) {
 				$content = hm_get_template_part( 'emails/trial_warning', array( 'days' => 3, 'return' => true ) );
 				$user->send_email( 'Your trial subscription will expire in 3 days', $content );
 			});
-			new AT_User_Admin_Button( 'Send a test editorial', '', function( $user ) {
+			new Archetype_User_Admin_Button( 'Send a test editorial', '', function( $user ) {
 
 				error_reporting( 0 );
 
