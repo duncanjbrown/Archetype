@@ -2,13 +2,17 @@ window.at_facebook = function( FB, $ ){
 
 	function loginWithFacebook( facebookResponse ) {
 		Archetype.post( 'fb_login', { response: facebookResponse }, function( result ) {
-			$( document ).trigger( 'Archetype_FB_Login', result );
+			FB.api( '/me', function( userinfo ) {
+				$( document ).trigger( 'Archetype_FB_Login', [ result, userinfo ] );				
+			} );
 		});
 	}
 
 	function connectWithFacebook( facebookResponse ) {
 		Archetype.post( 'fb_connect', { response: facebookResponse }, function( result ) {
-			$( document ).trigger( 'Archetype_FB_Connect', result );
+			FB.api( '/me', function( userinfo ) {
+				$( document ).trigger( 'Archetype_FB_Connect', [ result, userinfo ] );				
+			} );
 		});
 	}
 

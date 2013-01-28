@@ -331,7 +331,8 @@ abstract class Archetype_User_Field {
 			'validation' => '__return_true',
 			'required_for_signup' => false,
 			'show_in_signup' => false,
-			'signup_only' => false
+			'signup_only' => false,
+			'hidden' => false
 		);
 
 		$opts = wp_parse_args( $opts, $defaults );

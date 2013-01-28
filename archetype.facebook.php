@@ -449,8 +449,11 @@ add_action( 'wp_ajax_fb_connect', 'at_fb_connect' );
 function at_fb_connect( ) {
 	$user = User::current_user(); // not hooked to nopriv_ so user is def. present
 	$response = Archetype_Facebook::parse_fb_postdata( $_POST['response'] );
-	$user = Archetype_Facebook::bind_user( $user, $response );
-	at_ajax_response( array( 'answer' => 'yes' ) );
+	$user = Archetype_Facebook::bind_user( $user, $response['id'], $response['token'] );
+	at_ajax_response( array( 
+		'newUser' => false,
+		'facebookData' => $response 
+	) );
 }
 
 /**
@@ -469,9 +472,9 @@ add_action( 'wp_footer', function() {
 	} );
 
 /**
- * Add Login with FB button to the login form
+ * EXAMPLE: Add Login with FB button to the login form
  */
-add_filter( 'login_form_bottom', function() {
-		$fb = Archetype_Facebook::get_instance();
-		return at_buffer( array( $fb, 'login_button' ) ) . "<div id='fb_result'></div>";
-	} );
+/*add_filter( 'login_form_bottom', function() {
+	$fb = Archetype_Facebook::get_instance();
+	return at_buffer( array( $fb, 'login_button' ) ) . "<div id='fb_result'></div>";
+} );*/
