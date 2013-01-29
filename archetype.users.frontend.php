@@ -21,22 +21,12 @@ class Archetype_User_Signup_Form {
 	}
 
 	private function __construct() {
-		$this->fields = apply_filters( 'at_signup_fields', array() );
-		add_action( 'at_show_signup_fields', array( $this, 'show_fields' ) );
+		$this->fields = at_get_user_fields_for( 'signup' );
 	}
 
 	public function show_fields() {
 		foreach( $this->fields as $field )
 			$field->show_field();
-	}
-
-	/**
-	 * Attempt to register the user
-	 * @return mixed WP_Error|User user_id on success, otherwise false
-	 */
-	protected function do_signup() {
-		$user = User::register_by_email( $_POST['email'], $_POST['password'] );
-		return $user;	
 	}
 
 	/**
@@ -47,6 +37,7 @@ class Archetype_User_Signup_Form {
 
 		foreach( $this->fields as $field ) {
 			$posted = $field->get_posted_value();
+			error_log( $field->get_posted_value() );
 			if( !$field->is_valid( $posted ) && $field->opts['required_for_signup'] )
 				return new WP_Error( 'invalid_signup_details', $field->name );			
 		}
@@ -62,7 +53,17 @@ class Archetype_User_Signup_Form {
 			$field->save( $user->get_id() );
 		}
 
-		return $user;
+		if( $user )
+			$user->login();
+	}
+
+	/**
+	 * Attempt to register the user
+	 * @return mixed WP_Error|User user_id on success, otherwise false
+	 */
+	protected function do_signup() {
+		$user = User::register_by_email( $_POST['email'], $_POST['password'], $_POST['username'] );
+		return $user;	
 	}
 
 }

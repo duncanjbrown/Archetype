@@ -42,17 +42,31 @@ class Archetype_User_Profile {
 	 * @param  string $context the context to get
 	 * @return array          the fields
 	 */
-	function get_fields_by_context( $context ) {
+	function get_fields() {
+		if( !$this->context )
+			throw new Exception( __CLASS__ . ' needs a context to be set before retrieving fields' );
+		
+		$context = $this->context;
+		
 		return array_map( function( $field ) use ( $context ) {
 			$field->set_context( $context );
 			return $field;
 		}, $this->fields[$context] );
 	}
 
+	/**
+	 * Set the current context for this profile
+	 * @param string $context 
+	 */
 	function set_context( $context ) {
 		$this->context = $context;
 	}
 
+	/**
+	 * Get a named field in the current context
+	 * @param  string $name the field name it was registered with (its array key)
+	 * @return Archetype_User_Field       
+	 */
 	function get_field( $name ) {
 		if( !$this->context )
 			throw new Exception( __CLASS__ . ' needs a context to be set before retrieving fields' );
@@ -210,7 +224,12 @@ class Archetype_User_Field {
 	 * @return string 
 	 */
 	protected function get_template() {
-		return 'views/fields/' . $this->context . '/' . $this->type . '.php';
+
+		if( $this->context == 'admin' )
+			return 'views/fields/admin/' . $this->type . '.php';
+		else 
+			return 'views/fields/frontend/' . $this->type . '.php';
+
 	}
 
 	/**
@@ -250,7 +269,7 @@ class Archetype_User_Field {
 	 *
 	 * @return void
 	 */
-	public function show_field( $user ) {
+	public function show_field( $user = false ) {
 		include $this->get_template();
 	}
 
@@ -274,6 +293,10 @@ class Archetype_Admin_Profile_Hooks implements User_Profile_Hook_Context {
 		add_action( 'personal_options_update', array( $object, 'save' ) );
 		add_action( 'edit_user_profile_update', array( $object, 'save' ) );
 	}
+}
+
+class Archetype_Signup_Profile_Hooks implements User_Profile_Hook_Context {
+	public static function attach_hooks( $object ) {}
 }
 
 /**
@@ -309,4 +332,11 @@ add_action( 'init', function() {
 function at_register_fields( $fields ) {
 	foreach( $fields as $name => $data )
 		Archetype_User_Field::build( $name, $data );
+}
+
+function at_get_user_fields_for( $context ) {
+	$profile = Archetype_User_Profile::get_instance();
+	$profile->set_context( $context );
+	$fields = $profile->get_fields();
+	return $fields;
 }

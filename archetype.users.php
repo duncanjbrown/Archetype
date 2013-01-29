@@ -80,9 +80,10 @@ class User {
 	 *
 	 * @param string  $email    the email address to register by
 	 * @param string  $password optional the password to register them with
+	 * @param string  $username optional the username (or a random one will be assigned)
 	 * @return User|WP_Error
 	 */
-	public static function register_by_email( $email, $password = false ) {
+	public static function register_by_email( $email, $password = false, $username = false ) {
 
 		if ( !$email ) {
 			return new WP_Error( 'email_missing', 'You need to enter an email address' );
@@ -104,7 +105,10 @@ class User {
 			$password = wp_generate_password();
 
 		// create the user 
-		$user = wp_create_user( self::get_unique_uid(), $password, $email );
+		if( !$username )
+			$username = self::get_unique_uid();
+
+		$user = wp_create_user( $username, $password, $email );
 
 		if ( is_wp_error( $user ) ) {
 			return $user;

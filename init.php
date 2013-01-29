@@ -17,6 +17,7 @@ add_action( 'init', function() {
 });
 
 include( 'archetype.posts.php' );
+include( 'archetype.funnel.php' );
 include( 'archetype.avatars.php' );
 include( 'archetype.functions.php' );
 include( 'archetype.users.php' );
