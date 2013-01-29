@@ -129,7 +129,7 @@ abstract class Archetype_User_Field {
 	 */
 	public function save( $user_id ) {
 
-		if ( !current_user_can( 'edit_user', $user_id ) || !current_user_can( 'administrator' ) )
+		if ( !current_user_can( 'edit_user', $user_id ) )
 			return false;
 
 		$user = User::get( $user_id );
