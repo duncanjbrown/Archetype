@@ -27,6 +27,17 @@ function at_ajax_response( $data ) {
 }
 
 /**
+ * Log an array or object
+ * @param  mixed $thing
+ * @return void          
+ */
+function at_log_object( $thing ) {
+	ob_start();
+	print_r( $thing );
+	error_log( ob_get_clean());
+}
+
+/**
  * Get the MIME type of a string
  * @param string $string the file in a string
  * @return string
