@@ -35,7 +35,7 @@ class Archetype_User_Signup_Form {
 	 * @return mixed WP_Error|User user_id on success, otherwise false
 	 */
 	protected function do_signup() {
-		$user = User::register_by_email( $_POST['at_email'], $_POST['at_password'] );
+		$user = User::register_by_email( $_POST['email'], $_POST['password'] );
 		return $user;	
 	}
 
@@ -45,6 +45,12 @@ class Archetype_User_Signup_Form {
 	 */
 	public function handle_submit() {
 
+		foreach( $this->fields as $field ) {
+			$posted = $field->get_posted_value();
+			if( !$field->is_valid( $posted ) && $field->opts['required_for_signup'] )
+				return new WP_Error( 'invalid_signup_details', $field->name );			
+		}
+
 		$user = $this->do_signup();
 
 		if( is_wp_error( $user ) ) {
@@ -53,10 +59,6 @@ class Archetype_User_Signup_Form {
 		}
 
 		foreach( $this->fields as $field ) {
-
-			if( !$field->is_valid() && $field->opts['required_for_signup'] )
-				return new WP_Error( 'invalid_signup_details', $field->name );
-			
 			$field->save( $user->get_id() );
 		}
 
@@ -65,32 +67,7 @@ class Archetype_User_Signup_Form {
 
 }
 
-class Archetype_User_Frontend_Field extends Archetype_User_Field {
-
-	function attach_hooks() {
-		add_action( 'at_show_frontend_fields', array( &$this, 'show_field' ) );
-		add_action( 'at_save_frontend_fields', array( &$this, 'save' ) );
-	}
-
-	function show_field() {
-		include( 'views/fields/text_field.php' );
-	}
-
-	function is_valid() {
-		if( isset( $_POST[$this->slug] ) ) {
-			return call_user_func( $this->opts['validation'], $_POST[$this->slug] );
-		}
-	}
-}
-
+// init the form here to pick up submissions and set up fields
 add_action( 'wp_head', function() {
-	// init the form here to pick up submissions and set up fields
 	Archetype_User_Signup_Form::get_instance();
 });
-
-/**
- * Show the signup form
- */
-function at_signup_form() {
-	include( 'views/signup.php' );
-}

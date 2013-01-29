@@ -365,6 +365,9 @@ class User {
 		return (bool) $this->get_meta( AT_FB_ID_META );
 	}
 
+	public function get_avatar() {
+		return get_avatar( $this->get_id() );
+	}
 
 }
 

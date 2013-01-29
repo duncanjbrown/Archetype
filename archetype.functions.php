@@ -27,6 +27,28 @@ function at_ajax_response( $data ) {
 }
 
 /**
+ * Get the MIME type of a string
+ * @param string $string the file in a string
+ * @return string
+ */
+function at_get_string_mime_type( $string ) {
+	$finfo = new finfo( FILEINFO_MIME_TYPE );
+	return $finfo->buffer( $string );
+}
+
+/**
+ * Get the file extension for a given MIME type
+ * @param  string $mime_type the MIME type
+ * @return string            the extension
+ */
+function at_get_mime_type_ext( $mime_type ) {
+	$types = array(
+		'image/jpeg' 	=> 'jpg',
+		'image/png' 	=> 'png' );
+	return $types[$mime_type];
+}
+
+/**
  * Like get_template_part() put lets you pass args to the template file
  * Args are available in the tempalte as $template_args array
  * @param string filepart
