@@ -43,7 +43,3 @@ add_action( 'admin_menu', function() {
 	do_action( 'at_main_options_page', $main_options );
 
 } );
-
-add_filter( 'sanitize_title', function( $title ) {
-	return str_replace( '-', '_', $title );
-});
