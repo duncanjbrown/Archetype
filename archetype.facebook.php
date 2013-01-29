@@ -416,17 +416,6 @@ function at_fb_login() {
 add_action( 'wp_ajax_fb_connect', 'at_fb_connect' );
 
 /**
- * If a user is created, check for FB postdata and bind them if it's present
- */
-add_action( 'at_user_created', function( $user ) {
-
-	if( isset( $_POST[AT_FB_ID_META] ) && isset( $_POST[AT_FB_TOKEN_META] ) )
-		Archetype_Facebook::bind_user( $user, array( 
-			'token' => $_POST[AT_FB_TOKEN_META],
-			'id'    => $_POST[AT_FB_ID_META] ) );
-} );
-
-/**
  * Connect the currently logged in user to Facebook
  *
  * @return void
@@ -441,6 +430,17 @@ function at_fb_connect( ) {
 		'avatar' => $user->get_avatar()
 	) );
 }
+
+/**
+ * If a user is created, check for FB postdata and bind them if it's present
+ */
+add_action( 'at_user_created', function( $user ) {
+
+	if( isset( $_POST[AT_FB_ID_META] ) && isset( $_POST[AT_FB_TOKEN_META] ) )
+		Archetype_Facebook::bind_user( $user, array( 
+			'token' => $_POST[AT_FB_TOKEN_META],
+			'id'    => $_POST[AT_FB_ID_META] ) );
+} );
 
 /**
  * Add scripts and styles
