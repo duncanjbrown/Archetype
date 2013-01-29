@@ -6,92 +6,184 @@
 
 define( 'AT_USER_NONCE', '_at_update_user_profile' );
 
+class Archetype_User_Profile {
+
+	protected $fields = array();
+
+	protected $context;
+
+	protected static $_instance;
+
+	public static function get_instance() {
+		if( self::$_instance )
+			return self::$_instance;
+
+		return self::$_instance = new self;
+	}
+
+	protected function __construct() {}
+
+	/**
+	 * Add a field to this user profile
+	 * @param  string $context the context
+	 * @param  Archetype_User_Field $field   
+	 * @return void          
+	 */
+	function register_field( $context, $field) {
+
+		if( !is_array( $this->fields[$context] ) )
+			$this->fields[$context] = array();
+
+		$this->fields[$context][$field->name] = $field;
+	}
+
+	/**
+	 * Return the fields for a given context, letting the field know which context it's in
+	 * @param  string $context the context to get
+	 * @return array          the fields
+	 */
+	function get_fields_by_context( $context ) {
+		return array_map( function( $field ) use ( $context ) {
+			$field->set_context( $context );
+			return $field;
+		}, $this->fields[$context] );
+	}
+
+	function set_context( $context ) {
+		$this->context = $context;
+	}
+
+	function get_field( $name ) {
+		if( !$this->context )
+			throw new Exception( __CLASS__ . ' needs a context to be set before retrieving fields' );
+		
+		return $this->fields[$this->context][$name];
+	}
+}
+
 /**
- * Add fields to the user profile by extending this class
+ * Add fields to the user profile this class
  *
  * @package Archetype_Users
  */
-abstract class Archetype_User_Field {
+class Archetype_User_Field {
 
 	/**
-	 *
-	 *
 	 * @var $name the name of this field (used in the label)
-	 * @access protected
 	 */
-	protected $name;
+	public $name;
 
 	/**
-	 *
-	 *
-	 * @var $slug the id for this field
-	 * @access protected
+	 * The title to show in the label
 	 */
-	protected $slug;
+	public $title;
+
+	/**
+	 * The context we're seeing this field in
+	 * @var string
+	 */
+	protected $context = 'admin';
+
+	/**
+	 * @var $slug the id for this field
+	 */
+	public $slug;
 
 	/**
 	 * Other options - validation etc
 	 * @var array
 	 */
-	protected $opts;
+	public $opts;
 
 	/**
-	 *
-	 *
+	 * The template path to include to display the field
+	 */
+	public $template;
+
+	/**
 	 * @var $meta_key the usermeta key this field will work on
-	 * @access protected
 	 */
-	protected $meta_key;
+	public $meta_key;
 
 	/**
-	 *
-	 *
 	 * @var $desc the description to accompany the field
-	 * @access protected
 	 */
-	protected $desc;
+	public $desc;
+
+	/**
+	 * Instantiate a field from a set of array params
+	 * @param  string $name
+	 * @param  array $field 
+	 * @return Archettype_User_Field        
+	 */
+	public static function build( $name, $field ) {
+
+		switch( $field['type'] ) {
+			case 'text' :
+			default :
+				return new Archetype_User_Field ( 
+					$name,
+					$field['title'],
+					$field['type'],
+					$field['description'],
+					$field['meta_key'],
+					$field['opts']
+				);
+		}
+	}
 
 	/**
 	 * Add a new field to the user-admin page or the front end
 	 * Hook this on admin_init.
 	 *
 	 * @param string  $name        the name of the profile field
+	 * @param string  $type
 	 * @param string  $description the field's description to display alongside it
 	 * @param string  $meta_key    the usermeta key under which you'll store this data
 	 */
-	function __construct( $name, $description, $meta_key, $opts = array() ) {
+	function __construct( $name, $title, $type, $description, $meta_key, $opts = array() ) {
+
 		$this->name = $name;
+		$this->type = $type;
+		$this->title = $title;
 		$this->slug = $meta_key;
+		$this->meta_key = $meta_key;
 		$this->desc = $description;
 
 		$defaults = array( 
-			'validation' => '__return_true',
-			'required_for_signup' => false,
-			'show_in_signup' => false,
-			'signup_only' => false,
-			'hidden' => false
+			'validation' 			=> '__return_true',
+			'required_for_signup' 	=> false,
+			'signup_only' 			=> false,
+			'context' 				=> array( 'admin' ),
+			'hidden' 				=> false
 		);
 
 		$opts = wp_parse_args( $opts, $defaults );
 		$this->opts = $opts;
-		$this->meta_key = $meta_key;
 
-		if( $opts['show_in_signup'] || $opts['signup_only'] )
-			$this->register_as_signup_field();
-
-		if( !$opts['signup_only'] )
-			$this->attach_hooks();
+		foreach( $opts['context'] as $context ) {
+			$this->register_field( $context );
+			$this->attach_context_hooks( $context );
+		}
 	}
 
 	/**
-	 * Hook this field up to the signup form
+	 * Attach the context hooks according to which contexts we're interested in
+	 * @param  string $context a context
+	 * @return void          
+	 */
+	protected function attach_context_hooks( $context ) {
+		$class = 'Archetype_' . ucfirst( $context ) . '_Profile_Hooks';
+		call_user_func( $class . '::attach_hooks', $this );
+	}
+
+	/**
+	 * Register the field as a context of the whole user profile
 	 * @return void 
 	 */
-	private function register_as_signup_field() {
-		add_filter( 'at_signup_fields', function( $fields ) {
-			$fields[] = $this;
-			return $fields;
-		} );
+	protected function register_field( $context ) {
+		$profile = Archetype_User_Profile::get_instance();
+		$profile->register_field( $context, $this );
 	}
 
 	/**
@@ -106,6 +198,22 @@ abstract class Archetype_User_Field {
 	}
 
 	/**
+	 * Set the context we're currently seeing the field in
+	 * @param string $context 
+	 */
+	public function set_context( $context ) {
+		$this->context = $context;
+	}
+
+	/**
+	 * Get the template path for this field
+	 * @return string 
+	 */
+	protected function get_template() {
+		return 'views/fields/' . $this->context . '/' . $this->type . '.php';
+	}
+
+	/**
 	 * Is this valid input for this field?
 	 * @param mixed $input
 	 * @return boolean [description]
@@ -113,13 +221,6 @@ abstract class Archetype_User_Field {
 	function is_valid( $input ) {
 		return call_user_func( $this->opts['validation'], $input );
 	}
-	
-
-	/**
-	 * Set up the hooks for displaying and saving this field
-	 * @return void 
-	 */
-	abstract function attach_hooks();
 
 	/**
 	 * Update the usermeta on the profile page save action
@@ -145,96 +246,42 @@ abstract class Archetype_User_Field {
 	}
 
 	/**
-	 * Get the name
-	 *
-	 * @return string the field name
-	 */
-	public function get_name() {
-		return $this->name;
-	}
-
-	/**
-	 * Get the meta key
-	 *
-	 * @return string the meta key
-	 */
-	public function get_meta_key() {
-		return $this->meta_key;
-	}
-
-	/**
-	 * Get the slug
-	 *
-	 * @return string the slug
-	 */
-	public function get_slug() {
-		return $this->slug;
-	}
-
-	/**
-	 * Get the desription
-	 *
-	 * @return string the field desc
-	 */
-	public function get_desc() {
-		return $this->desc;
-	}
-
-	/**
 	 * Show the field using an include
 	 *
 	 * @return void
 	 */
 	public function show_field( $user ) {
-		include 'views/admin_text_field.php';
+		include $this->get_template();
 	}
 
 }
 
-class Archetype_User_Admin_Field extends Archetype_User_Field {
+interface User_Profile_Hook_Context {
+	public static function attach_hooks( $object );
+}
 
-	function attach_hooks() {
-		add_action( 'show_user_profile', array( &$this, 'show_field' ) );
-		add_action( 'edit_user_profile', array( &$this, 'show_field' ) );
-		add_action( 'personal_options_update', array( &$this, 'save' ) );
-		add_action( 'edit_user_profile_update', array( &$this, 'save' ) );
+class Archetype_Frontend_Profile_Hooks implements User_Profile_Hook_Context {
+	public static function attach_hooks( $object ) {
+		add_action( 'at_show_frontend_fields', array( $object, 'show_field' ) );
+		add_action( 'at_save_frontend_fields', array( $object, 'save' ) );
 	}
 }
 
-class Archetype_User_Frontend_Field extends Archetype_User_Field {
-
-	function attach_hooks() {
-		add_action( 'at_show_frontend_fields', array( &$this, 'show_field' ) );
-		add_action( 'at_save_frontend_fields', array( &$this, 'save' ) );
+class Archetype_Admin_Profile_Hooks implements User_Profile_Hook_Context {
+	public static function attach_hooks( $object ) {
+		add_action( 'show_user_profile', array( $object, 'show_field' ) );
+		add_action( 'edit_user_profile', array( $object, 'show_field' ) );
+		add_action( 'personal_options_update', array( $object, 'save' ) );
+		add_action( 'edit_user_profile_update', array( $object, 'save' ) );
 	}
-
-	function show_field() {
-		include( 'views/fields/text_field.php' );
-	}
-
 }
 
 /**
  * Implement checkboxes for the User Admin page
  *
  */
-class Archetype_User_Admin_Checkbox_Field extends Archetype_User_Admin_Field {
+class Archetype_User_Admin_Checkbox_Field extends Archetype_User_Field {
 
-	/**
-	 * Show the field using an include
-	 *
-	 * @return void
-	 */
-	public function show_field( $user ) {
-		include 'views/admin_checkbox_field.php';
-	}
-
-	/**
-	 * Update the usermeta on the profile page save action
-	 * For internal wp use
-	 *
-	 * @param int     $user_id the ID of the user to update (supplied by WP)
-	 */
 	public function save( $user_id ) {
 
 		if ( !current_user_can( 'edit_user', $user_id ) || !current_user_can( 'administrator' ) )
@@ -253,22 +300,13 @@ class Archetype_User_Admin_Checkbox_Field extends Archetype_User_Admin_Field {
 
 }
 
-class Archetype_User_Admin_Select_Field extends Archetype_User_Admin_Field {
+add_action( 'init', function() {
+	$fields = apply_filters( 'at_user_fields', array() );
+	if( !empty( $fields ) )
+		at_register_fields( $fields );
+} );
 
-	protected $options_callback;
-
-	/**
-	 * As Archetype_User_Admin_Field, except takes an extra arg to supply the options for the select
-	 * in 'value' => 'description' format
-	 */
-	function __construct( $name, $desc, $key, $callback, $options_callback ) {
-		parent::__construct( $name, $desc, $key, $callback );
-		$this->options_callback = $options_callback;
-	}
-
-	function show_field( $user ) {
-		$options = call_user_func( $this->options_callback );
-		include 'views/admin_select_field.php';
-	}
-
+function at_register_fields( $fields ) {
+	foreach( $fields as $name => $data )
+		Archetype_User_Field::build( $name, $data );
 }
