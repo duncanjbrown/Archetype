@@ -46,6 +46,9 @@ class Archetype_User_Profile {
 		if( !$this->context )
 			throw new Exception( __CLASS__ . ' needs a context to be set before retrieving fields' );
 		
+		if( !$this->fields )
+			return false; 
+		
 		$context = $this->context;
 		
 		return array_map( function( $field ) use ( $context ) {
