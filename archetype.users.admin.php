@@ -216,11 +216,6 @@ class Archetype_Admin_Form_Field extends Archetype_Form_Field {
 }
 
 interface Archetype_Save_Field_Strategy {
-
-	/**
-	 * Save the field
-	 * @param  int $user_id supplied by WP
-	 */
 	public function save( $user_id, $field );
 }
 
@@ -264,6 +259,10 @@ class Archetype_Checkbox_Field_Save_Strategy implements Archetype_Save_Field_Str
 
 }
 
-function at_register_signup_field( $field ) {
+/**
+ * Add a submission field 
+ * @param  string $field the field name
+ */
+function at_register_field( $field ) {
 	Archetype_Form_Field::build( $field );
 }

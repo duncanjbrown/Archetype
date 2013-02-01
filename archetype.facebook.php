@@ -15,6 +15,7 @@ define( 'AT_FB_PERMS', get_option( 'at_fb_perms' ) );
 define( 'AT_FB_ID_META', 'at_fb_id' );
 define( 'AT_FB_TOKEN_META', 'at_fb_token' );
 define( 'AT_FB_TOKEN_EXPIRES', 'at_fb_expires' );
+define( 'AT_FB_DATA_META', 'at_fb_data' );
 
 class Archetype_Facebook {
 
@@ -183,6 +184,13 @@ class Archetype_Facebook {
 
 		$fb = self::get_instance( $long_token['token'] );
 		$info = $fb->get_userinfo();
+
+		if( !$info ) {
+			error_log( 'Facebook bind error for user ' . $user->get_id() );
+			return $user;
+		}
+
+		$user->update_meta( AT_FB_DATA_META, $info );
 
 		$avatar = new Archetype_Facebook_Avatar( $user->get_id() );
 		$avatar->procure( $info['username'] );

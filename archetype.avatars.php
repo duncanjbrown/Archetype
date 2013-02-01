@@ -115,11 +115,14 @@ class Archetype_Facebook_Avatar extends Archetype_Avatar {
 	}
 
 	function procure( $fb_username ) {
-		$this->avatar = file_get_contents( "http://graph.facebook.com/${fb_username}/picture" );
+		$this->avatar = file_get_contents( "http://graph.facebook.com/${fb_username}/picture?width=200&height=200" );
 	}
 
 }
 
+/**
+ * Filter function so we can use our own avatars
+ */
 function at_custom_avatar_filter( $avatar, $id_or_email, $size, $default, $alt ) {
 
 	$custom_avatar = Archetype_Avatar::get_for_user( $id_or_email );
