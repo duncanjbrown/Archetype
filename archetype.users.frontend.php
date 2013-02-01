@@ -21,12 +21,7 @@ class Archetype_User_Signup_Form {
 	}
 
 	private function __construct() {
-		$this->fields = at_get_user_fields_for( 'signup' );
-	}
-
-	public function show_fields() {
-		foreach( $this->fields as $field )
-			$field->show_field();
+		$this->fields = Archetype_Form_Field::get_fields();
 	}
 
 	/**
@@ -67,8 +62,3 @@ class Archetype_User_Signup_Form {
 	}
 
 }
-
-// init the form here to pick up submissions and set up fields
-add_action( 'wp_head', function() {
-	Archetype_User_Signup_Form::get_instance();
-});
