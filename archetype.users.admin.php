@@ -252,13 +252,12 @@ class Archetype_Checkbox_Field_Save_Strategy implements Archetype_Save_Field_Str
 
 		$user = User::get( $user_id );
 
-		if ( !isset( $_POST[$this->meta_key] ) ) {
-			$user->update_meta( $this->meta_key, '0' );
+		if ( !isset( $_POST[$field->meta_key] ) ) {
+			$user->update_meta( $field->meta_key, '0' );
 			return;
 		}
 
-		$value = sanitize_text_field( $_POST[$this->meta_key] );
-		$user->update_meta( $this->meta_key, $value );
+		$user->update_meta( $field->meta_key, $value );
 	}
 
 }
