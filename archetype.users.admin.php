@@ -6,75 +6,6 @@
 
 define( 'AT_USER_NONCE', '_at_update_user_profile' );
 
-class Archetype_User_Profile {
-
-	protected $fields = array();
-
-	protected $context;
-
-	protected static $_instance;
-
-	public static function get_instance() {
-		if( self::$_instance )
-			return self::$_instance;
-
-		return self::$_instance = new self;
-	}
-
-	protected function __construct() {}
-
-	/**
-	 * Add a field to this user profile
-	 * @param  string $context the context
-	 * @param  Archetype_User_Field $field   
-	 * @return void          
-	 */
-	function register_field( $context, $field) {
-
-		if( !is_array( $this->fields[$context] ) )
-			$this->fields[$context] = array();
-
-		$this->fields[$context][$field->name] = $field;
-	}
-
-	/**
-	 * Return the fields for a given context, letting the field know which context it's in
-	 * @param  string $context the context to get
-	 * @return array          the fields
-	 */
-	function get_fields() {
-		if( !$this->context )
-			throw new Exception( __CLASS__ . ' needs a context to be set before retrieving fields' );
-		
-		$context = $this->context;
-		
-		return array_map( function( $field ) use ( $context ) {
-			$field->set_context( $context );
-			return $field;
-		}, $this->fields[$context] );
-	}
-
-	/**
-	 * Set the current context for this profile
-	 * @param string $context 
-	 */
-	function set_context( $context ) {
-		$this->context = $context;
-	}
-
-	/**
-	 * Get a named field in the current context
-	 * @param  string $name the field name it was registered with (its array key)
-	 * @return Archetype_User_Field       
-	 */
-	function get_field( $name ) {
-		if( !$this->context )
-			throw new Exception( __CLASS__ . ' needs a context to be set before retrieving fields' );
-		
-		return $this->fields[$this->context][$name];
-	}
-}
-
 /**
  * Add fields to the user profile this class
  *
@@ -317,7 +248,7 @@ class Archetype_Checkbox_Field_Save_Strategy implements Archetype_Save_Field_Str
 
 	public function save( $user_id, $field ) {
 
-		if ( !current_user_can( 'edit_user', $user_id ) || !current_user_can( 'administrator' ) )
+		if ( !current_user_can( 'edit_user', $user_id ) )
 			return false;
 
 		$user = User::get( $user_id );
@@ -327,6 +258,7 @@ class Archetype_Checkbox_Field_Save_Strategy implements Archetype_Save_Field_Str
 			return;
 		}
 
+		$value = sanitize_text_field( $field->get_posted_value() );
 		$user->update_meta( $field->meta_key, $value );
 	}
 
