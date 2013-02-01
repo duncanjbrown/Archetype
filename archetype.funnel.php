@@ -121,8 +121,9 @@ class Archetype_Funnel {
 				break;
 
 			case 'once' :
-				$tests[$phase] = function( $user ) use ( $phase ) {
-					if( !$progress = $user->get_meta( $this->name, true ) ) {
+				$name = $this->name;
+				$tests[$phase] = function( $user ) use ( $phase, $name ) {
+					if( !$progress = $user->get_meta( $name, true ) ) {
 						$progress = array();
 					}
 
