@@ -6,8 +6,82 @@
 
 define( 'AT_USER_NONCE', '_at_update_user_profile' );
 
+<<<<<<< HEAD
+=======
+class Archetype_User_Profile {
+
+	protected $fields = array();
+
+	protected $context;
+
+	protected static $_instance;
+
+	public static function get_instance() {
+		if( self::$_instance )
+			return self::$_instance;
+
+		return self::$_instance = new self;
+	}
+
+	protected function __construct() {}
+
+	/**
+	 * Add a field to this user profile
+	 * @param  string $context the context
+	 * @param  Archetype_User_Field $field   
+	 * @return void          
+	 */
+	function register_field( $context, $field) {
+
+		if( !is_array( $this->fields[$context] ) )
+			$this->fields[$context] = array();
+
+		$this->fields[$context][$field->name] = $field;
+	}
+
+	/**
+	 * Return the fields for a given context, letting the field know which context it's in
+	 * @param  string $context the context to get
+	 * @return array          the fields
+	 */
+	function get_fields() {
+		if( !$this->context )
+			throw new Exception( __CLASS__ . ' needs a context to be set before retrieving fields' );
+		
+		if( !$this->fields )
+			return false; 
+		
+		$context = $this->context;
+		
+		return array_map( function( $field ) use ( $context ) {
+			$field->set_context( $context );
+			return $field;
+		}, $this->fields[$context] );
+	}
+
+	/**
+	 * Set the current context for this profile
+	 * @param string $context 
+	 */
+	function set_context( $context ) {
+		$this->context = $context;
+	}
+
+	/**
+	 * Get a named field in the current context
+	 * @param  string $name the field name it was registered with (its array key)
+	 * @return Archetype_User_Field       
+	 */
+	function get_field( $name ) {
+		if( !$this->context )
+			throw new Exception( __CLASS__ . ' needs a context to be set before retrieving fields' );
+		
+		return $this->fields[$this->context][$name];
+	}
+}
+
+>>>>>>> c3e616e9ab1e68bd9f27b2b08dcfa1d3bffda778
 /**
- * Add fields to the user profile
  *
  * @package Archetype_Users
  */
@@ -70,7 +144,7 @@ class Archetype_Form_Field {
 			$class = __CLASS__;
 
 		$field = new $class ( 
-			$field['name'],
+			$field['meta_key'],
 			$field['title'],
 			$field['type'],
 			$field['description'],
@@ -84,7 +158,7 @@ class Archetype_Form_Field {
 	}
 
 	/**
-	 * Get the registered fields
+	 * Get the registered registered
 	 * @return array 
 	 */
 	public static function get_fields() {
@@ -103,16 +177,16 @@ class Archetype_Form_Field {
 	function __construct( $name, $title, $type, $description, $meta_key, $opts = array() ) {
 
 		$this->name = $name;
-		$this->slug = at_underscore_slug( $name );
 		$this->type = $type;
 		$this->title = $title;
+		$this->slug = $meta_key;
 		$this->meta_key = $meta_key;
 		$this->desc = $description;
 
 		$defaults = array( 
 			'admin' 				=> true,
 			'validation' 			=> '__return_true',
-			'required'			 	=> false,
+			'required_for_signup' 	=> false,
 			'signup_only' 			=> false,
 			'hidden' 				=> false
 		);
@@ -144,10 +218,6 @@ class Archetype_Form_Field {
 		$this->context = $context;
 	}
 
-	public function required() {
-		return $this->opts['required'];
-	}
-
 	/**
 	 * Get the template path for this field
 	 * @return string 
@@ -163,10 +233,11 @@ class Archetype_Form_Field {
 
 	/**
 	 * Is this valid input for this field?
+	 * @param mixed $input
 	 * @return boolean [description]
 	 */
-	function is_valid() {
-		return call_user_func( $this->opts['validation'], $this->get_posted_value() );
+	function is_valid( $input ) {
+		return call_user_func( $this->opts['validation'], $input );
 	}
 
 	/**
@@ -219,6 +290,11 @@ class Archetype_Admin_Form_Field extends Archetype_Form_Field {
 }
 
 interface Archetype_Save_Field_Strategy {
+
+	/**
+	 * Save the field
+	 * @param  int $user_id supplied by WP
+	 */
 	public function save( $user_id, $field );
 }
 
@@ -246,7 +322,7 @@ class Archetype_Checkbox_Field_Save_Strategy implements Archetype_Save_Field_Str
 
 	public function save( $user_id, $field ) {
 
-		if ( !current_user_can( 'edit_user', $user_id ) )
+		if ( !current_user_can( 'edit_user', $user_id ) || !current_user_can( 'administrator' ) )
 			return false;
 
 		$user = User::get( $user_id );
@@ -256,16 +332,11 @@ class Archetype_Checkbox_Field_Save_Strategy implements Archetype_Save_Field_Str
 			return;
 		}
 
-		$value = sanitize_text_field( $field->get_posted_value() );
 		$user->update_meta( $field->meta_key, $value );
 	}
 
 }
 
-/**
- * Add a submission field 
- * @param  string $field the field name
- */
-function at_register_field( $field ) {
+function at_register_signup_field( $field ) {
 	Archetype_Form_Field::build( $field );
 }

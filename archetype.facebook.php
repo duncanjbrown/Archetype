@@ -75,9 +75,9 @@ class Archetype_Facebook {
 	 *
 	 * @return void
 	 */
-	public static function login_button( ) {
+	public static function login_button( $text = false ) {
 		$fb = self::get_instance();
-		$fb->_login_button();
+		$fb->_login_button( $text );
 	}
 
 	/**
@@ -88,6 +88,16 @@ class Archetype_Facebook {
 	public static function connect_button( ) {
 		$fb = self::get_instance();
 		$fb->_connect_button();
+	}
+
+	/**
+	 * Render a login button
+	 *
+	 * @return void
+	 */
+	public static function signup_button( ) {
+		$fb = self::get_instance();
+		$fb->_signup_button();
 	}
 
 	/**
@@ -298,6 +308,17 @@ class Archetype_Facebook {
 	}
 
 	/**
+	 * Display the login button
+	 *
+	 * @param string  $text
+	 * @return void
+	 */
+	public function _signup_button( $text = 'Sign up with Facebook' ) {
+		include 'views/fb_signup_button.php';
+	}
+
+
+	/**
 	 * Display the connect button
 	 *
 	 * @param string  $text
@@ -410,13 +431,13 @@ function at_fb_login() {
 		Archetype_Facebook::bind_user( $user, $response );
 		$user->login();
 		at_ajax_response( array(
-			'newUser' => false
+			'newUser' => false,
+			'facebookData' => $response
 		) );
 	} else {
 		at_ajax_response( array( 
 			'newUser' => true,
-			'facebookData' => $response,
-			'avatar' => $user->get_avatar()
+			'facebookData' => $response
 		) );
 	}
 }
@@ -444,7 +465,8 @@ function at_fb_connect( ) {
  */
 add_action( 'at_user_created', function( $user ) {
 
-	if( isset( $_POST[AT_FB_ID_META] ) && isset( $_POST[AT_FB_TOKEN_META] ) )
+	if( isset( $_POST[AT_FB_ID_META] ) && isset( $_POST[AT_FB_TOKEN_META] ) 
+		&& $_POST[AT_FB_ID] != '' )
 		Archetype_Facebook::bind_user( $user, array( 
 			'token' => $_POST[AT_FB_TOKEN_META],
 			'id'    => $_POST[AT_FB_ID_META] ) );
@@ -454,9 +476,9 @@ add_action( 'at_user_created', function( $user ) {
  * Add scripts and styles
  */
 add_action( 'init', function() {
-		wp_enqueue_script( 'at_fb', AT_PLUGIN_URL . 'js/facebook.js' );
-		wp_enqueue_style( 'at_fb_css', AT_PLUGIN_URL . 'css/facebook.css' );
-	} );
+	wp_enqueue_script( 'at_fb', AT_PLUGIN_URL . 'js/facebook.js' );
+	wp_enqueue_style( 'at_fb_css', AT_PLUGIN_URL . 'css/facebook.css' );
+} );
 
 /**
  * Add facebook script to the footer

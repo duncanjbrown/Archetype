@@ -27,6 +27,27 @@ function at_ajax_response( $data ) {
 }
 
 /**
+ * Create a slug with underscores instead of dashes
+ * @param  string $string 
+ * @return string         
+ */
+function at_underscore_slug( $string ) {
+	$_string = sanitize_title( $string );
+	return str_replace( '-', '_', $_string );
+}
+
+/**
+ * Display some WP Error messages
+ * @param  array $wp_errors some wp errors
+ * @return void            
+ */
+function at_display_errors( $wp_errors ) {
+	foreach( $wp_errors as $error ) {
+		tn_add_static_message( 'error', $error->get_error_message() );
+	}
+} 
+
+/**
  * Log an array or object
  * @param  mixed $thing
  * @return void          
