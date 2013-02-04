@@ -244,4 +244,18 @@ class Term {
 		return $this->_term->description;
 	}
 
+	public function get_example_post() {
+
+		$query = new WP_Query( array( 
+			'numberposts' => 1,
+			'orderby' => 'rand', 
+			$this->get_taxonomy() => $this->get_slug() 
+		) );
+
+		if( $query->posts ) 
+			return array_pop( $query->posts );
+
+		return null;
+	}
+
 }
