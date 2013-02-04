@@ -77,6 +77,9 @@ class Archetype_Funnel {
 
 }
 
+/**
+ * @package archetype.funnel
+ */
 class Archetype_Signup_Phase {
 
 	var $slug;

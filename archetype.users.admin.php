@@ -120,6 +120,7 @@ class Archetype_Form_Field {
 			'validation' 			=> '__return_true',
 			'required'			 	=> false,
 			'signup_only' 			=> false,
+			'choices'				=> '__return_false',
 			'hidden' 				=> false
 		);
 
@@ -142,6 +143,14 @@ class Archetype_Form_Field {
 		return sanitize_text_field( $val );
 
 		return false;
+	}
+
+	/**
+	 * Get the alternatives for this field, eg if it's a select.
+	 * @return array
+	 */
+	public function get_choices() {
+		return call_user_func( $this->opts['choices'] );
 	}
 
 	/**

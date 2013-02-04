@@ -56,10 +56,31 @@ class Archetype_Form {
 			$this->fields[$field->slug] = $field;
 
 		$this->options = wp_parse_args( $options, array(
-			'show_discrete_errors' => true ) );
+			'show_discrete_errors' => true,
+			'hook_to_page' => false,
+			'nonce' => AT_USER_NONCE ) );
 
-		$process_class = "Archetype_" . ucfirst( $form_name ) . "_Form_Processor";
+		// convenient way to attach a hook to p_g_p on a given page
+		if( $page = $this->options['hook_to_page'] && $nonce = $this->options['nonce'] ) {
+
+			add_action( 'pre_get_posts', function() use ( $page, $form_name, $nonce ) {
+				if( is_page( $page ) ) {
+					at_form( $form_name, $nonce );
+				}
+			});
+
+		}
+
+		$process_class = "Archetype_" . ucwords( $form_name ) . "_Form_Processor";
 		$this->processor = new $process_class;
+	}
+
+	/**
+	 * Display the nonce field
+	 * @return void
+	 */
+	function nonce_field() {
+		wp_nonce_field( $this->options['nonce'] );
 	}
 
 	/**
@@ -116,11 +137,14 @@ class Archetype_Form {
 			$this->errors[] = new WP_Error( 'failed_nonce_check', 'Illegitimate form submission' );
 
 		foreach( $this->fields as $field ) {
+
 			if( $field->required() && ( !$field->is_valid() || is_wp_error( $field->is_valid() ) ) ) {
 
 				if( is_wp_error( $field->is_valid() ) ) {
+					
 					$message = $field->is_valid()->get_error_message();
 					$this->errors[] = new WP_Error( 'failed_field_validation', $message );
+
 				} else {
 
 					if( $generic_error )
@@ -133,11 +157,15 @@ class Archetype_Form {
 			}
 		}
 
-		if( !empty( $this->errors ) && $this->options['show_discrete_errors'] )
+		if( !empty( $this->errors ) && $this->options['show_discrete_errors'] ) {
+		
 			return new WP_Error( 'at_form_errors', 'Errors found', $this->errors );
-		else if( !empty( $this->errors ) ) {
+
+		} else if( !empty( $this->errors ) ) {
+		
 			$message = apply_filters( 'archetype_generic_form_error_message', 'Oops! There were errors' );
 			return new WP_Error( 'at_form_errors', 'Errors found', array( new WP_Error( 'general_errors', $message ) ) );
+		
 		}
 
 		return true;
@@ -148,15 +176,31 @@ abstract class Archetype_Form_Processor {
 
 	protected $errors = array();
 
-	function add_error( $error ) {
+	/**
+	 * Add an error to the internal errors array
+	 * @param WP_Error $error 
+	 */
+	function add_error( WP_Error $error ) {
 		$this->errors[] = $error;
 	}
 
+	/**
+	 * What happens when the form has been submitted successfully
+	 * Will redirect to the same page by default.
+	 * 
+	 * @param  mixed $data 
+	 * @return void       
+	 */
 	public function succeed( $data ) {
 		wp_redirect( wp_get_referer() );
 		die();
 	}
 
+	/**
+	 * Process the valid, sanitized input
+	 * @param  array $fields an array of Archetype_Form_Fields
+	 * @return mixed         
+	 */
 	abstract function process( $fields );
 }
 
@@ -197,8 +241,6 @@ function at_register_form( $form_name, $fields, $options ) {
 			return $f;
 	}, $all_fields );
 
-	if( in_array( null, $the_fields ) ) 
-		wp_die( 'Missing field registration' );
+	Archetype_Form::add( $form_name, array_filter( $the_fields ), $options );
 
-	Archetype_Form::add( $form_name, $the_fields, $options );
 }

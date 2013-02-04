@@ -37,6 +37,17 @@ function at_underscore_slug( $string ) {
 }
 
 /**
+ * Does a number lie within a range?
+ * @param  int $num the number to check
+ * @param  min $min the low end
+ * @param  max $max the high end
+ * @return bool      
+ */
+function at_in_range( $num, $min, $max ) {
+	return ($num >= $min && $num <= $max);
+}
+
+/**
  * Display some WP Error messages
  * @param  array $wp_errors some wp errors
  * @return void            
