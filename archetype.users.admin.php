@@ -132,12 +132,14 @@ class Archetype_Form_Field {
 	}
 
 	/**
-	 * Get the posted value for this field if there is one
+	 * Get the sanitized, posted value for this field if there is one
 	 * @return mixed field data, or false
 	 */
 	public function get_posted_value() {
 		if( isset( $_POST[$this->slug] ) ) 
-			return $_POST[$this->slug];
+			$val = $_POST[$this->slug];
+
+		return sanitize_text_field( $val );
 
 		return false;
 	}
@@ -155,13 +157,9 @@ class Archetype_Form_Field {
 	}
 
 	/**
-	 * Set the context we're currently seeing the field in
-	 * @param string $context 
+	 * Is this field marked as required?
+	 * @return bool 
 	 */
-	public function set_context( $context ) {
-		$this->context = $context;
-	}
-
 	public function required() {
 		return $this->opts['required'];
 	}

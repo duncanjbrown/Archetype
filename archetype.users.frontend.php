@@ -10,6 +10,7 @@ class Archetype_Form {
 	public $fields;
 	public $errors = array();
 	private $processor;
+	private $options;
 
 	public static $forms = array();
 
@@ -17,10 +18,12 @@ class Archetype_Form {
 	 * Add a new form
 	 * @param string $form_name the name of the form
 	 * @param array $fields    array of Archetype_Form_Fields
+	 * @param array $options
 	 */
-	public static function add( $form_name, $fields ) {
-		$form = new self( $form_name, $fields );
+	public static function add( $form_name, $fields, $options = false ) {
+		$form = new self( $form_name, $fields, $options );
 		self::$forms[$form_name] = $form;
+
 	}
 
 	/**
@@ -43,11 +46,16 @@ class Archetype_Form {
 	 * 
 	 * @param string $form_name 
 	 * @param array $fields    array of Archetype_Form_Fields
+	 * @param array $options
 	 */
-	function __construct( $form_name, $fields ) {
-		foreach( $fields as $field ) {
+	function __construct( $form_name, $fields, $options = false ) {
+		
+		foreach( $fields as $field )
 			$this->fields[$field->slug] = $field;
-		}
+
+		$this->options = wp_parse_args( $options, array(
+			'show_discrete_errors' => true ) );
+
 		$process_class = "Archetype_" . ucfirst( $form_name ) . "_Form_Processor";
 		$this->processor = new $process_class;
 	}
@@ -57,7 +65,19 @@ class Archetype_Form {
 	 * @return mixed
 	 */
 	function process() {
-		$this->processor->process( $this->fields );
+		$succeeded = $this->processor->process( $this->fields );
+		if( $succeeded ) {
+			$this->success_callback( $succeeded );
+		}
+	}
+
+	/**
+	 * What to do if the form submission is all OK
+	 * @param  mixed $arbitrary_data data to hand to the success function
+	 * @return void            
+	 */
+	function success_callback( $arbitrary_data ) {
+		$this->processor->succeed( $arbitrary_data );
 	}
 
 	/**
@@ -111,8 +131,12 @@ class Archetype_Form {
 			}
 		}
 
-		if( !empty( $this->errors ) )
+		if( !empty( $this->errors ) && $this->options['show_discrete_errors'] )
 			return new WP_Error( 'at_form_errors', 'Errors found', $this->errors );
+		else if( !empty( $this->errors ) ) {
+			$message = apply_filters( 'archetype_generic_form_error_message', 'Oops! There were errors' );
+			return new WP_Error( 'at_form_errors', 'Errors found', array( new WP_Error( 'general_errors', $message ) ) );
+		}
 
 		return true;
 	}
@@ -124,6 +148,11 @@ abstract class Archetype_Form_Processor {
 
 	function add_error( $error ) {
 		$this->errors[] = $error;
+	}
+
+	public function succeed( $data ) {
+		wp_redirect( wp_get_referer() );
+		die();
 	}
 
 	abstract function process( $fields );
@@ -154,9 +183,10 @@ function at_form( $form_name, $nonce ) {
  * Register a form 
  * @param  string $form_name the form's name
  * @param  Archetype_Form_Fields[] $fields    array of form fields
+ * @param array $options
  * @return void
  */
-function at_register_form( $form_name, $fields ) {
+function at_register_form( $form_name, $fields, $options ) {
 	
 	$all_fields = Archetype_Form_Field::get_fields();
 
@@ -168,5 +198,5 @@ function at_register_form( $form_name, $fields ) {
 	if( in_array( null, $the_fields ) ) 
 		wp_die( 'Missing field registration' );
 
-	Archetype_Form::add( $form_name, $the_fields );
+	Archetype_Form::add( $form_name, $the_fields, $options );
 }
