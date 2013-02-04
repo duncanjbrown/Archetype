@@ -85,22 +85,11 @@ class User {
 	 */
 	public static function register_by_email( $email, $password = false, $username = false ) {
 
-		if ( !$email ) {
-			return new WP_Error( 'email_missing', 'You need to enter an email address' );
-		}
+		$validation = self::email_can_register( $email );
 
-		//validate email
-		if ( !is_email( $email ) ) {
-			return new WP_Error( 'invalid_email', 'The address you entered was invalid' );
-		}
+		if( is_wp_error( $validation ) )
+			return $validation;
 
-		//check for the existence of this email in the system 
-		// if the existing user is an unexpected wp_error, throw an E 
-		if ( $existing_user = self::get_by_email( $email ) ) {
-			return new WP_Error( 'email_registered', 'That address is already registered' );
-		}
-
-		// if we get this far, it means we have a valid email and a new user
 		if ( !$password )
 			$password = wp_generate_password();
 
@@ -124,6 +113,28 @@ class User {
 			wp_new_user_notification( $_user->get_id(), $password );
 
 		return $_user;
+	}
+
+	/**
+	 * Check if an email is allowed to register
+	 * @param  string $email 	
+	 * @return mixed         true | WP_Error
+	 */
+	public static function email_can_register( $email = '' ) {
+
+		if ( !$email ) {
+			return new WP_Error( 'email_missing', 'You need to enter an email address' );
+		}
+
+		if ( !is_email( $email ) ) {
+			return new WP_Error( 'invalid_email', 'The address you entered was invalid' );
+		}
+
+		if ( $existing_user = self::get_by_email( $email ) ) {
+			return new WP_Error( 'email_registered', 'That address is already registered', $existing_user );
+		}
+
+		return true;
 	}
 
 	/**

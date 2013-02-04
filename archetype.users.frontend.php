@@ -13,15 +13,37 @@ class Archetype_Form {
 
 	public static $forms = array();
 
+	/**
+	 * Add a new form
+	 * @param string $form_name the name of the form
+	 * @param array $fields    array of Archetype_Form_Fields
+	 */
 	public static function add( $form_name, $fields ) {
 		$form = new self( $form_name, $fields );
 		self::$forms[$form_name] = $form;
 	}
 
+	/**
+	 * Get the fields for a given form
+	 * @param  string $form_name the name
+	 * @return Archetype_Form            
+	 */
 	public static function get( $form_name ) {
 		return self::$forms[$form_name];
 	}
 
+	/**
+	 * Create a new form. The form will be processed by the process() callback in
+	 * a class called Archetype_${form_name}_Form_Processor.
+	 *
+	 * Eg to create a form called 'Signup', hand this function a bunch of fields 
+	 * and the word 'signup', and define a class called Archetype_Signup_Form_Processor
+	 * (note the form_name is uppercased), with a process() method that does whatever
+	 * you like with the validated data.
+	 * 
+	 * @param string $form_name 
+	 * @param array $fields    array of Archetype_Form_Fields
+	 */
 	function __construct( $form_name, $fields ) {
 		foreach( $fields as $field ) {
 			$this->fields[$field->slug] = $field;
@@ -30,21 +52,43 @@ class Archetype_Form {
 		$this->processor = new $process_class;
 	}
 
+	/**
+	 * Process the form input
+	 * @return mixed
+	 */
 	function process() {
 		$this->processor->process( $this->fields );
-		$this->processor->errors();
 	}
 
+	/**
+	 * Get a field for this form
+	 * @param  string $name the field slug
+	 * @return Archetype_User_Field       
+	 */
+	function get_field( $name ) {
+		return $this->fields[$name];
+	}
+
+	/**
+	 * Get the names of this form's fields
+	 * @return array 
+	 */
 	function get_field_names() {
 		return array_keys( $this->fields );
 	}
 
 	/**
 	 * Perform valdiation on the form elements
+	 *
+	 * Called from the at_form() function, which you should hook before page output.
+	 * 
 	 * @param  string $nonce_action
 	 * @return mixed true|WP_Error
 	 */
 	public function validate( $nonce_action ) {
+
+		// only record generic errors once
+		$generic_error = false;
 		
 		if( !wp_verify_nonce( $_POST['_wpnonce'], $nonce_action ) )
 			$this->errors[] = new WP_Error( 'failed_nonce_check', 'Illegitimate form submission' );
@@ -54,10 +98,16 @@ class Archetype_Form {
 
 				if( is_wp_error( $field->is_valid() ) ) {
 					$message = $field->is_valid()->get_error_message();
+					$this->errors[] = new WP_Error( 'failed_field_validation', $message );
 				} else {
-					$message = 'Invalid input';
+
+					if( $generic_error )
+						continue;
+
+					$message = 'Please fill in the required information';
+					$this->errors[] = new WP_Error( 'generic_validation_failure', $message );
+					$generic_error = true;
 				}
-				$this->errors[] = new WP_Error( 'failed_field_validation', $message );
 			}
 		}
 
@@ -76,15 +126,11 @@ abstract class Archetype_Form_Processor {
 		$this->errors[] = $error;
 	}
 
-	function errors() {
-		at_display_errors( $this->errors );
-	}
-
 	abstract function process( $fields );
 }
 
 /**
- * Template function - put this on the page where your form is being processed
+ * Template function - hook this before output on the page your form is being processed
  * @param  string $form_name the form's name
  * @param  string $nonce     the nonce to use when receiving data
  * @return mixed            

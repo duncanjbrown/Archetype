@@ -14,6 +14,9 @@ add_action( 'init', function() {
 		'shortinit' => AT_PLUGIN_URL . 'ajax/shortinit.php',
 	 	'isUserLoggedIn' => is_user_logged_in()
 	) );
+	if( !is_admin() ) {
+		wp_enqueue_style( 'archetype_frontend', AT_PLUGIN_URL . '/css/archetype.frontend.css' );
+	}
 });
 
 include( 'archetype.posts.php' );

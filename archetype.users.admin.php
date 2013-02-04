@@ -45,6 +45,12 @@ class Archetype_Form_Field {
 	public $meta_key;
 
 	/**
+	 * Is the field valid as posted
+	 * @var bool
+	 */
+	public $valid;
+
+	/**
 	 * @var $desc the description to accompany the field
 	 */
 	public $desc;
@@ -64,7 +70,7 @@ class Archetype_Form_Field {
 
 		$class = 'Archetype_Form_Field';
 
-		if( $field['opts']['admin'] == true && is_admin() ) 
+		if( isset( $field['opts']['admin'] ) && $field['opts']['admin'] == true && is_admin() ) 
 			$class = 'Archetype_Admin_Form_Field';
 		else 
 			$class = __CLASS__;
@@ -73,9 +79,9 @@ class Archetype_Form_Field {
 			$field['name'],
 			$field['title'],
 			$field['type'],
-			$field['description'],
-			$field['meta_key'],
-			$field['opts']
+			isset( $field['description'] ) ?  $field['description'] : '',
+			isset( $field['meta_key'] ) ?  $field['meta_key'] : '',
+			isset( $field['opts'] ) ?  $field['opts'] : ''
 		);
 
 		self::$fields[] = $field;
@@ -137,6 +143,18 @@ class Archetype_Form_Field {
 	}
 
 	/**
+	 * Get the posted value of this field if there is one, or put the existing value if not
+	 * @param  mixed $default 
+	 * @return mixed          
+	 */
+	public function get_value( $default = null ) {
+		if( $value = $this->get_posted_value() )
+			return $value;
+
+		return $default;
+	}
+
+	/**
 	 * Set the context we're currently seeing the field in
 	 * @param string $context 
 	 */
@@ -163,10 +181,18 @@ class Archetype_Form_Field {
 
 	/**
 	 * Is this valid input for this field?
-	 * @return boolean [description]
+	 * First checks it's been provided if required, then validates input
+	 * 
+	 * @return boolean
 	 */
 	function is_valid() {
-		return call_user_func( $this->opts['validation'], $this->get_posted_value() );
+
+		if( $this->required() && !( $this->get_posted_value() ) )
+			$this->valid = false;
+		else 
+			$this->valid = call_user_func( $this->opts['validation'], $this->get_posted_value() );
+	
+		return $this->valid;
 	}
 
 	/**
@@ -177,6 +203,36 @@ class Archetype_Form_Field {
 	public function show_field( $user = false ) {
 		$admin = is_admin() ? true : false;
 		include $this->get_template( $admin );
+	}
+
+	/**
+	 * Get classes to add to this field depending on what's been input
+	 * @return string  space-separated class names
+	 */
+	protected function get_classes() {
+
+		$classes = array();
+
+		if ( $this->valid === false || is_wp_error( $this->valid ) ) { 
+			$classes = array_merge( $classes, apply_filters( 'archetype_invalid_field_class', array( 'invalid' ) ) );
+		}
+
+		return implode( ' ', $classes);
+	}
+
+	/**
+	 * Get error data to attach to this field
+	 * @return string  an error string
+	 */
+	protected function get_error() {
+
+		if( $this->valid === false && $this->required() ) {
+			return 'You need to fill this box in';
+		} else if( is_wp_error( $this->valid ) ) {
+			return $this->valid->get_error_message();
+		}
+
+		return false;
 	}
 
 }
