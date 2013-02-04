@@ -1,13 +1,14 @@
 <?php
 /**
  * @package archetype
- * @subpackage archetype.options
+ * @subpackage options
  */
 
 define( 'AT_OPTIONS_VERSION', 0.1 );
 
 /**
  * A class to encapsulate the creation of simple WP options pages
+ * @package archetype.options
  */
 class Archetype_Options_Page {
 

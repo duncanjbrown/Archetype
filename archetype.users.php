@@ -3,14 +3,15 @@
  * Users
  *
  * @package archetype
- * @subpackage archetype.users
+ * @subpackage users
  */
 
 define( 'AT_DELETED_META', 'at_deleted' );
 
 /**
  * Encapsulate the WP User so it can be treated as an object
- *
+ * @package archetype.users
+ * 
  */
 class User {
 

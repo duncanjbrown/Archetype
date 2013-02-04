@@ -1,7 +1,7 @@
 <?php
 /**
  * @package archetype
- * @subpackage  archetype.users
+ * @subpackage forms
  */
 
 define( 'AT_USER_NONCE', '_at_update_user_profile' );
@@ -9,7 +9,7 @@ define( 'AT_USER_NONCE', '_at_update_user_profile' );
 /**
  * Add fields to the user profile
  *
- * @package Archetype_Users
+ * @package archetype.forms
  */
 class Archetype_Form_Field {
 

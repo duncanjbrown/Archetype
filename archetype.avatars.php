@@ -7,6 +7,9 @@
 define( 'AT_AVATAR_PATH_META', 'at_avatar_path' );
 define( 'AT_AVATAR_OPTION', 'at_avatar_option' );
 
+/**
+ * @package archetype.avatars
+ */
 abstract class Archetype_Avatar {
 
 	protected $avatar;

@@ -1,7 +1,7 @@
 <?php
 /**
  * @package archetype
- * @subpackage archetype.messages
+ * @subpackage messages
  */
 
 define( 'TN_MESSAGES_COOKIE', 'TN_theme_notices' );
@@ -17,10 +17,10 @@ add_action( 'init', function() {
 });
 
 /**
- * TN_Messages
  * Stores messages in a cookie 
  * That cookie holds a JSON hash of types => messages
  * You can get the hash with tn_get_messages()
+ * @package archetype.messages
  */
 class TN_Messages {
 

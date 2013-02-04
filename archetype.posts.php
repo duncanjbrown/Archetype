@@ -1,8 +1,8 @@
 <?php
 /**
  * @package archetype
+ * @subpackage posts
  */
-
 class Post {
 
 	public $_post;

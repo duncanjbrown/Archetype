@@ -1,10 +1,12 @@
 <?php
 /**
  * @package archetype
- * @subpackage users
+ * @subpackage forms
  */
 
-
+/**
+ * @package archetype.forms
+ */
 class Archetype_Form {
 
 	public $fields;

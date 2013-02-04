@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @package archetype
+ * @subpackage funnel
+ */
 
 /**
  * Pass the user through a series of pages so they must visit them in order.
@@ -8,6 +11,7 @@
  * The first test that fails gets to execute a callback, typically a redirect,
  * on a hook of its choice, though it could be something more (or less) trivial
  *
+ * @package archetype.funnel
  */
 class Archetype_Funnel {
 

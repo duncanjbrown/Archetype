@@ -3,7 +3,7 @@
  *
  *
  * @package archetype
- * @subpackage archetype.sso
+ * @subpackage facebook
  */
 
 // Facebook SDK
@@ -17,6 +17,9 @@ define( 'AT_FB_TOKEN_META', 'at_fb_token' );
 define( 'AT_FB_TOKEN_EXPIRES', 'at_fb_expires' );
 define( 'AT_FB_DATA_META', 'at_fb_data' );
 
+/**
+ * @package archetype.facebook
+ */
 class Archetype_Facebook {
 
 	var $app_id;

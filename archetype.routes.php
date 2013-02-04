@@ -1,7 +1,7 @@
 <?php
 /**
  * @package archetype
- * @subpackage archetype.route
+ * @subpackage route
  */
 
 /**
@@ -9,7 +9,7 @@
  * Although all the code is original,this class owes a huge debt 
  * to hm-rewrite by Joe Hoyle at Humanmade - credit him, not me, if you must.
  * 
- * @param 
+ * @package archetype.route
  */
 class Archetype_Route {
 
