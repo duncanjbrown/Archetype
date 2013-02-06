@@ -121,7 +121,8 @@ class Archetype_Form_Field {
 			'required'			 	=> false,
 			'signup_only' 			=> false,
 			'choices'				=> '__return_false',
-			'hidden' 				=> false
+			'hidden' 				=> false,
+			'placeholder'			=> false
 		);
 
 		$opts = wp_parse_args( $opts, $defaults );
