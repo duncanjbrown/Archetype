@@ -73,7 +73,7 @@ class Archetype_Route {
 
 		if ( isset( $this->args['template'] ) ) {
 			$this->template = $this->args['template'];
-			add_filter( 'template_redirect', array( &$this, 'template_redirect' ) );
+			add_filter( 'template_redirect', array( &$this, 'template_redirect' ), 1, 0 );
 		}
 
 	}
@@ -92,7 +92,6 @@ class Archetype_Route {
 	}
 
 	function template_redirect() {
-
 		include locate_template( $this->template );
 		exit;
 	}
