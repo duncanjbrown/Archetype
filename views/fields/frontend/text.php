@@ -1,2 +1,2 @@
 <label for="<?php echo $this->slug; ?>"><?php echo $this->title; ?></label>
-<input class="<?php echo $this->get_classes(); ?>" data-error="<?php echo $this->get_error(); ?>" data-bind="value: <?php echo $this->slug; ?>" name='<?php echo $this->slug; ?>' size='40' type='text' value='<?php echo $this->get_value( $opt ); ?>' />
+<input class="<?php echo $this->get_classes(); ?>" data-error="<?php echo $this->get_error(); ?>" data-bind="value: <?php echo $this->slug; ?>" name='<?php echo $this->slug; ?>' size='40' type='text' value='<?php echo $this->get_value( $opt ? $opt : null ); ?>' />
