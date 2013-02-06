@@ -141,7 +141,10 @@ class Archetype_Form_Field {
 		if( isset( $_POST[$this->slug] ) ) 
 			$val = $_POST[$this->slug];
 
-		return sanitize_text_field( $val );
+		if( is_string( $val ) )
+			return sanitize_text_field( $val );
+		if( is_array( $val ) )
+			return array_map( 'sanitize_text_field', $val );
 
 		return false;
 	}

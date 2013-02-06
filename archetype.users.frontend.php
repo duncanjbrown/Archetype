@@ -41,7 +41,7 @@ class Archetype_Form {
 	 * Create a new form. The form will be processed by the process() callback in
 	 * a class called Archetype_${form_name}_Form_Processor.
 	 *
-	 * Eg to create a form called 'Signup', hand this function a bunch of fields 
+	 * Eg to create a form called 'Signup', hand this constructor a bunch of fields 
 	 * and the word 'signup', and define a class called Archetype_Signup_Form_Processor
 	 * (note the form_name is uppercased), with a process() method that does whatever
 	 * you like with the validated data.
