@@ -3,6 +3,7 @@
  * @package archetype
  */
 
+
 define( 'AT_PLUGIN_PATH', trailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'AT_PLUGIN_URL', trailingslashit( plugin_dir_url( __FILE__ ) ) );
 
