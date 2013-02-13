@@ -258,4 +258,8 @@ class Term {
 		return null;
 	}
 
+	public function __toString() {
+		return $this->get_name();
+	}
+
 }
