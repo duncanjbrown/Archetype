@@ -61,8 +61,12 @@ class Archetype_Form {
 			'nonce' => AT_USER_NONCE ) );
 
 		// convenient way to attach a hook to p_g_p on a given page
-		if( $page = $this->options['hook_to_page'] && $nonce = $this->options['nonce'] ) {
+		if( $this->options['hook_to_page'] && $this->options['nonce'] ) {
 
+			// must assign these here; they don't work inside if() clause
+			$page = $this->options['hook_to_page'];
+			$nonce = $this->options['nonce'];
+			
 			add_action( 'pre_get_posts', function() use ( $page, $form_name, $nonce ) {
 				if( is_page( $page ) ) {
 					at_form( $form_name, $nonce );
@@ -163,12 +167,22 @@ class Archetype_Form {
 
 		} else if( !empty( $this->errors ) ) {
 		
-			$message = apply_filters( 'archetype_generic_form_error_message', 'Oops! There were errors' );
+			$message = apply_filters( 'archetype_generic_form_error_message', 'Please correct the errors below' );
 			return new WP_Error( 'at_form_errors', 'Errors found', array( new WP_Error( 'general_errors', $message ) ) );
 		
 		}
 
 		return true;
+	}
+
+	public function messages() {
+		$errors = apply_filters( 'at_form_errors', null );
+		if( !$errors )
+			return;
+
+		foreach( $errors as $error ) { ?>
+			<div class="tn_message error"><?php echo $error->get_error_message(); ?></div>	
+		<?php }
 	}
 }
 
@@ -219,8 +233,13 @@ function at_form( $form_name, $nonce ) {
 
 	$valid = $form->validate( $nonce );
 
-	if( is_wp_error( $valid ) )
-		at_display_errors( $valid->get_error_data( 'at_form_errors' ) );
+	if( is_wp_error( $valid ) ) {
+		$errors = $valid->get_error_data( 'at_form_errors' );
+		at_display_errors( $errors ); //to show in page-level notices
+		add_filter( 'at_form_errors', function() use ( $errors ) {
+			return $errors;
+		} ); // to show in form function call
+	}
 
 	$form->process();
 }
