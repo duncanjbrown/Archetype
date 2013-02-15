@@ -138,8 +138,7 @@ class Archetype_Form_Field {
 	 * @return mixed field data, or false
 	 */
 	public function get_posted_value() {
-		if( isset( $_POST[$this->slug] ) ) 
-			$val = $_POST[$this->slug];
+		$val = at_get_post_value( $this->slug );
 
 		if( is_string( $val ) )
 			return sanitize_text_field( $val );

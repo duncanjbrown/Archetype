@@ -80,6 +80,15 @@ function at_get_string_mime_type( $string ) {
 }
 
 /**
+ * Get a POSTed value, checking if isset() beforehand
+ * @param  string $key the POST key
+ * @return mixed      $_POST value or null on no value present
+ */
+function at_get_post_value( $key ) {
+	return isset( $_POST[$key] ) ? $_POST[$key] : null;
+}
+
+/**
  * Get the file extension for a given MIME type
  * @param  string $mime_type the MIME type
  * @return string            the extension

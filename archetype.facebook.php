@@ -63,6 +63,11 @@ class Archetype_Facebook {
 		$fb->_js_sdk();
 	}
 
+	public static function button( $context = 'login', $text = 'Login with Facebook' ) {
+		$fb = self::get_instance();
+		$fb->_button( $context, $text );
+	}
+
 	/**
 	 * Provide the output FB expects for its 'channel URL'
 	 *
@@ -71,46 +76,6 @@ class Archetype_Facebook {
 	public static function channel() {
 		$fb = self::get_instance();
 		$fb->_channel();
-	}
-
-	/**
-	 * Render a login button
-	 *
-	 * @return void
-	 */
-	public static function login_button( $text = false ) {
-		$fb = self::get_instance();
-		$fb->_login_button( $text );
-	}
-
-	/**
-	 * Render a login button
-	 *
-	 * @return void
-	 */
-	public static function connect_button( ) {
-		$fb = self::get_instance();
-		$fb->_connect_button();
-	}
-
-	/**
-	 * Render a login button
-	 *
-	 * @return void
-	 */
-	public static function signup_button( ) {
-		$fb = self::get_instance();
-		$fb->_signup_button();
-	}
-
-	/**
-	 * Render a login button
-	 *
-	 * @return void
-	 */
-	public static function reauth_button( ) {
-		$fb = self::get_instance();
-		$fb->_reauth_button();
 	}
 
 	/**
@@ -288,47 +253,15 @@ class Archetype_Facebook {
 	}
 
 	/**
-	 * @secrettodo make all these buttons static methods
-	 */
-
-	/**
-	 * Show a button inviting the user to refresh their connection with FB
-	 * @return void 
-	 */
-	public function _reauth_button() {
-		if( self::$reauth )
-			$this->_connect_button( 'Reconnect with Facebook' );
-	}
-
-	/**
-	 * Display the login button
+	 * Display the button
 	 *
-	 * @param string  $text
+	 * @param string  	$context
+	 * @param string 	$text
 	 * @return void
 	 */
-	public function _login_button( $text = 'Log in with Facebook' ) {
+	private function _button( $context, $text ) {
+		$text = apply_filters( 'at_fb_button', $text );
 		include 'views/fb_button.php';
-	}
-
-	/**
-	 * Display the login button
-	 *
-	 * @param string  $text
-	 * @return void
-	 */
-	public function _signup_button( $text = 'Sign up with Facebook' ) {
-		include 'views/fb_signup_button.php';
-	}
-
-
-	/**
-	 * Display the connect button
-	 *
-	 * @param string  $text
-	 * @return void
-	 */
-	public function _connect_button( $text = 'Connect with Facebook' ) {
-		include 'views/fb_connect_button.php';
 	}
 
 	/**

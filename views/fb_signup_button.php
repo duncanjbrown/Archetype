@@ -1,1 +1,0 @@
-<div class="at_fb_signup" data-scope="<?php echo $this->get_perms(); ?>"><?php echo $text; ?></div>
