@@ -67,8 +67,9 @@ class Archetype_Form {
 			$page = $this->options['hook_to_page'];
 			$nonce = $this->options['nonce'];
 			
-			add_action( 'pre_get_posts', function() use ( $page, $form_name, $nonce ) {
-				if( is_page( $page ) ) {
+			add_action( 'pre_get_posts', function( $query ) use ( $page, $form_name, $nonce ) {
+				
+				if( is_page() && $query->query_vars['pagename'] == $page ) {
 					at_form( $form_name, $nonce );
 				}
 			});
