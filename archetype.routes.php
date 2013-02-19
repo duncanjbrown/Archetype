@@ -71,6 +71,9 @@ class Archetype_Route {
 		if ( isset( $this->args['title_callback'] ) )
 			add_filter( 'wp_title', array( &$this, 'title_callback' ) );
 
+		if ( isset( $this->args['wp'] ) )
+			add_action( 'wp', array( &$this, 'wp' ) );
+
 		if ( isset( $this->args['template'] ) ) {
 			$this->template = $this->args['template'];
 			add_filter( 'template_redirect', array( &$this, 'template_redirect' ), 1, 0 );
@@ -89,6 +92,10 @@ class Archetype_Route {
 	function title_callback( $title ) {
 
 		return call_user_func( $this->args['title_callback'], $title );
+	}
+
+	function wp( $wp ) {
+		call_user_func( $this->args['wp'], $wp );
 	}
 
 	function template_redirect() {
