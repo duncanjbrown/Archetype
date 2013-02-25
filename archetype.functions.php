@@ -95,7 +95,7 @@ function at_get_post_value( $key ) {
  */
 function at_is( $var ) {
 	global $wp_query;
-	return !empty( $wp_query->$var ) && $wp_query->var;
+	return !empty( $wp_query->$var ) && $wp_query->$var;
 }
 
 /**
