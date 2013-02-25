@@ -8,6 +8,7 @@ window.at_facebook = function( FB, $ ){
 		$( document ).trigger( 'ArchetypeFB_AJAXstart', _clicked );
 		Archetype.post( 'fb_login', { response: facebookResponse }, function( result ) {
 			FB.api( '/me', function( userinfo ) {
+				console.log(userinfo);
 				$( document ).trigger( 'ArchetypeFB_AJAXstop', _clicked );
 				$( document ).trigger( 'ArchetypeFB_Login', [ result, userinfo ] );				
 			} );
@@ -37,20 +38,23 @@ window.at_facebook = function( FB, $ ){
 	FB.Event.subscribe('auth.authResponseChange', function(response) {
 		if( response.status === 'connected' && !Archetype.isUserLoggedIn() ) {
 			
-			console.log( signup );
-			if( signup )
+			if( signup ) {
 				signupWithFacebook( response );
-			else
+			} else {
 				loginWithFacebook( response );
+			}
 		
 		} else if( response.status === 'connected' ) {
 			connectWithFacebook( response );
 		}
 	});
 
+	/**
+	 * Method fires whenever fb API call is made, 
+	 * to set state for receiving callback
+	 */
 	function contactFacebook( e ) {
 		clicked = e.target;
-		console.log( 'co' );
 		var scope = $( this ) .data( 'scope' );
 		FB.login( function() {}, { scope: scope } );
 	}

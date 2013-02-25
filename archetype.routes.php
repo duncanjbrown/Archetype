@@ -38,7 +38,7 @@ class Archetype_Route {
 		add_action( 'rewrite_rules_array', function( $rules ) use ( $regex, $args ) {
 			$new_rules = array();
 
-			$new_rules[$regex] = 'index.php?' . empty( $args['rewrite'] ) ? '' : $args['rewrite'];
+			$new_rules[$regex] = 'index.php?' . ( empty( $args['rewrite'] ) ? '' : $args['rewrite'] );
 
 			return $new_rules + $rules;
 		});

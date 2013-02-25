@@ -381,8 +381,14 @@ class User {
 		return (bool) $this->get_meta( AT_FB_ID_META );
 	}
 
-	public function get_avatar() {
-		return get_avatar( $this->get_id() );
+	/**
+	 * Get this user's avatar
+	 * 
+	 * Params like native function get_avatar
+	 * @return string image tag
+	 */
+	public function get_avatar( $size = false, $default = false, $alt = false ) {
+		return get_avatar( $this->get_id(), $size, $default, $alt );
 	}
 
 }
