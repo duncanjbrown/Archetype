@@ -89,6 +89,16 @@ function at_get_post_value( $key ) {
 }
 
 /**
+ * Check for presence of a wp_query property
+ * @param  string $var the varname
+ * @return boolean      
+ */
+function at_is( $var ) {
+	global $wp_query;
+	return !empty( $wp_query->$var ) && $wp_query->var;
+}
+
+/**
  * Get the file extension for a given MIME type
  * @param  string $mime_type the MIME type
  * @return string            the extension
