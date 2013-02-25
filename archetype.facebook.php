@@ -178,6 +178,14 @@ class Archetype_Facebook {
 	}
 
 	/**
+	 * Do we need to reauth?
+	 * @return bool 
+	 */
+	public static function needs_reauth() {
+		return self::$reauth;
+	}
+
+	/**
 	 * Create a new Facebook singleton
 	 *
 	 * @param string  $app_id     the FB app id

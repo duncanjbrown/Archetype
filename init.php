@@ -25,13 +25,12 @@ include( 'archetype.funnel.php' );
 include( 'archetype.avatars.php' );
 include( 'archetype.functions.php' );
 include( 'archetype.users.php' );
-include( 'archetype.users.admin.php' );
 include( 'archetype.options.php' );
 include( 'archetype.messages.php' );
 include( 'archetype.routes.php' );
 include( 'archetype.facebook.php' );
 include( 'archetype.users.email-auth.php' );
-include( 'archetype.users.frontend.php' );
+include( 'archetype.fields.php' );
 
 
 add_action( 'admin_menu', function() {

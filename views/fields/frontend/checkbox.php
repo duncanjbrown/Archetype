@@ -1,0 +1,2 @@
+<label for="<?php echo $this->name; ?>"><?php echo $this->title; ?></label>
+<input class="<?php echo $this->get_classes(); ?>" data-error="<?php echo $this->get_error(); ?>" data-bind="value: <?php echo $this->name; ?>" name='<?php echo $this->name; ?>' size='30' type='checkbox' <?php checked( $this->get_value( null ), 1 ); ?> value='1' />
