@@ -395,8 +395,9 @@ class Archetype_Form_Field {
 	 * @return mixed          
 	 */
 	public function get_value( $default = null ) {
-		if( $value = $this->get_posted_value() )
+		if( $value = $this->get_posted_value() ) {
 			return $value;
+		}
 
 		if( $this->opts['value'] ) {
 			return $this->opts['value'];
@@ -577,7 +578,7 @@ class Archetype_Checkbox_Field_Save_Strategy implements Archetype_Save_Field_Str
  * @param array $options
  * @return void
  */
-function at_register_form( $form_name, $fields, $options ) {
+function at_register_form( $form_name, $fields, $options = array() ) {
 	
 	$all_fields = Archetype_Form_Field::get_fields();
 
