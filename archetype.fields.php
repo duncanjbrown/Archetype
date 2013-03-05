@@ -571,7 +571,8 @@ class Archetype_Checkbox_Field_Save_Strategy implements Archetype_Save_Field_Str
  *
  * pulls all the registered fields from archetype_form_field
  * and checks them for presence in the passed array of field names
- * if a field matches, it makes it into the form
+ * if a field matches, it makes it into the form. Any options
+ * passed when making the form field are added at this point
  * 
  * @param  string $form_name the form's name
  * @param  Archetype_Form_Fields[] $fields    array of form field names
@@ -587,7 +588,9 @@ function at_register_form( $form_name, $fields, $options = array() ) {
 	foreach( $all_fields as $f ) {
 		if( isset( $fields[$f->name] ) ) {
 			$new_field = clone $f; // override options on a per-form basis
-			$new_field->update_options( $fields[$f->name] ); // apply any options passed with the form
+			if( $fields[$f->name] ) { // there are options to override
+				$new_field->update_options( $fields[$f->name] ); // apply any options passed with the form
+			}
 			$form_fields[] = $new_field;
 		}
 	}
