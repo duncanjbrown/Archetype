@@ -410,7 +410,7 @@ function at_fb_connect( ) {
 add_action( 'at_user_created', function( $user ) {
 
 	if( isset( $_POST[AT_FB_ID_META] ) && isset( $_POST[AT_FB_TOKEN_META] ) 
-		&& $_POST[AT_FB_ID] != '' )
+		&& $_POST[AT_FB_ID_META] != '' )
 		Archetype_Facebook::bind_user( $user, array( 
 			'token' => $_POST[AT_FB_TOKEN_META],
 			'id'    => $_POST[AT_FB_ID_META] ) );
