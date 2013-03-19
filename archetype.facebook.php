@@ -59,8 +59,7 @@ class Archetype_Facebook {
 	 * @return void
 	 */
 	public static function js_sdk() {
-		$fb = self::get_instance();
-		$fb->_js_sdk();
+		include 'views/fb_sdk.php';
 	}
 
 	public static function button( $context = 'login', $text = 'Login with Facebook' ) {
@@ -281,14 +280,6 @@ class Archetype_Facebook {
 		return AT_FB_PERMS;
 	}
 
-	/**
-	 * Display the Js sdk code for the page header
-	 *
-	 * @return void
-	 */
-	public function _js_sdk() {
-		include 'views/fb_sdk.php';
-	}
 
 	/**
 	 * Generate the output for the FB channel url

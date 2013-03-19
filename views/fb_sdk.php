@@ -2,7 +2,7 @@
 <script>
   window.fbAsyncInit = function() {
     FB.init({
-      appId      : '<?php echo $this->app_id; ?>', 
+      appId      : '<?php echo AT_FB_ID; ?>', 
       channelUrl : '<?php echo site_url( "_fb_channel" ); ?>', 
       status     : false, //important 
       cookie     : true, 
