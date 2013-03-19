@@ -1,1 +1,1 @@
-<div class="at_fb_<?php echo $context; ?> at_facebook facebook" data-scope="<?php echo $this->get_perms(); ?>"><span class="fb_button_text"><?php echo $text; ?></span></div>
+<div class="at_fb_<?php echo $context; ?> at_facebook facebook" data-scope="<?php echo AT_FB_PERMS; ?>"><span class="fb_button_text"><?php echo $text; ?></span></div>

@@ -6,7 +6,9 @@ window.at_facebook = function( FB, $ ){
 	function loginWithFacebook( facebookResponse ) {
 		var _clicked = clicked;
 		$( document ).trigger( 'ArchetypeFB_AJAXstart', _clicked );
+		console.log( 'ss' );
 		Archetype.post( 'fb_login', { response: facebookResponse }, function( result ) {
+			console.log('cc');
 			FB.api( '/me', function( userinfo ) {
 				console.log(userinfo);
 				$( document ).trigger( 'ArchetypeFB_AJAXstop', _clicked );

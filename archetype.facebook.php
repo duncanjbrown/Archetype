@@ -62,9 +62,15 @@ class Archetype_Facebook {
 		include 'views/fb_sdk.php';
 	}
 
+	/**
+	 * Display the button
+	 * @param  string $context login, signup etc
+	 * @param  string $text    what to put on the button
+	 * @return void          
+	 */
 	public static function button( $context = 'login', $text = 'Login with Facebook' ) {
-		$fb = self::get_instance();
-		$fb->_button( $context, $text );
+		$text = apply_filters( 'at_fb_button', $text );
+		include 'views/fb_button.php';
 	}
 
 	/**
@@ -257,18 +263,6 @@ class Archetype_Facebook {
 	 */
 	public function nag_to_reauth() {
 		tn_add_static_message( 'error', 'Your Facebook account needs to be reconnected. Visit your settings page to fix it.' );
-	}
-
-	/**
-	 * Display the button
-	 *
-	 * @param string  	$context
-	 * @param string 	$text
-	 * @return void
-	 */
-	private function _button( $context, $text ) {
-		$text = apply_filters( 'at_fb_button', $text );
-		include 'views/fb_button.php';
 	}
 
 	/**

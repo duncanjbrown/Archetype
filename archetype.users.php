@@ -307,7 +307,7 @@ class User {
 	public function login() {
 		wp_set_current_user( $this->get_id() );
 		wp_set_auth_cookie( $this->get_id() );
-		do_action('wp_login', $this->get_login() );
+		do_action('wp_login', $this->get_login(), $this->get_user() );
 	}
 
 	public function __toString() {
