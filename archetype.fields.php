@@ -68,7 +68,6 @@ class Archetype_Form {
 		// convenient way to attach a hook to p_g_p on a given page
 		if( $this->options['hook_to_page'] && $this->options['nonce'] ) {
 
-			// must assign these here; they don't work inside if() clause
 			$page = $this->options['hook_to_page'];
 			$nonce = $this->options['nonce'];
 			
@@ -81,6 +80,7 @@ class Archetype_Form {
 
 		}
 
+		// @todo lazy-load this
 		$process_class = "Archetype_" . ucwords( $form_name ) . "_Form_Processor";
 		$this->processor = new $process_class;
 	}
@@ -128,6 +128,25 @@ class Archetype_Form {
 	 */
 	function get_field_names() {
 		return array_keys( $this->fields );
+	}
+
+	/**
+	 * Show all the fields
+	 * @return [type] [description]
+	 */
+	function show_fields() {
+		foreach( $this->fields as $field ) {
+			$field->show_field();
+		}
+	}
+
+	/**
+	 * Retrieve the nonce to check for posted form
+	 * @todo use a hidden param to specify which form is being posted
+	 * @return string 
+	 */
+	function get_nonce() {
+		return $this->options['nonce'];
 	}
 
 	/**
@@ -449,7 +468,7 @@ class Archetype_Form_Field {
 	 * @return void
 	 */
 	public function show_field( $user = false ) {
-		$admin = is_admin() ? true : false;
+		$admin = is_admin() && !defined( 'DOING_AJAX' ) ? true : false;
 		include $this->get_template( $admin );
 	}
 
@@ -617,8 +636,14 @@ function at_form( $form_name, $nonce ) {
 
 	if( $_SERVER['REQUEST_METHOD'] != 'POST' )
 		return;
-	
+
 	$form = Archetype_Form::get( $form_name );
+
+	// don't process the wrong form
+	// atm we use nonces to distinguish, this could be much better
+	if( !wp_verify_nonce( $_POST['_wpnonce'], $form->get_nonce() ) )
+		return;
+	
 
 	$valid = $form->validate( $nonce );
 
