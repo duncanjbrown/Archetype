@@ -27,6 +27,12 @@ abstract class Archetype_Avatar {
 	 * @return mixed false|Archetype_Avatar
 	 */
 	public static function get_for_user( $id ) {
+
+		if( is_object( $id ) ) {
+			// we are in the comment loop and have been passed a comment instead of an ID. wtf.
+			$id = $id->user_id;
+		}
+		
 		$type = get_user_meta( $id, AT_AVATAR_OPTION, true );
 		
 		if( !$type )
