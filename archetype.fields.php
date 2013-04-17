@@ -376,7 +376,9 @@ class Archetype_Form_Field {
 				'hidden' 				=> false,
 				'placeholder'			=> false,
 				'required'				=> false,
-				'value' 				=> false
+				'value' 				=> false,
+				'disabled'				=> false,
+				'readonly'				=> false
 			);
 
 			$opts = wp_parse_args( $opts, $defaults );
@@ -431,6 +433,30 @@ class Archetype_Form_Field {
 	 */
 	public function required() {
 		return $this->opts['required'];
+	}
+
+	/**
+	 * Is this field marked as disabled
+	 * @return bool 
+	 */
+	public function disabled() {
+		return $this->opts['disabled'];
+	}
+
+	/**
+	 * Is the field marked read-only
+	 * @return bool 
+	 */
+	public function readonly() {
+		return $this->opts['readonly'];
+	}
+
+	/**
+	 * Set the value of the field
+	 * @param mixed $value 
+	 */
+	public function set_value( $value ) {
+		$this->opts['value'] = $value;
 	}
 
 	/**

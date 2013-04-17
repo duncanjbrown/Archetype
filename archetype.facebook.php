@@ -74,16 +74,6 @@ class Archetype_Facebook {
 	}
 
 	/**
-	 * Provide the output FB expects for its 'channel URL'
-	 *
-	 * @return void
-	 */
-	public static function channel() {
-		$fb = self::get_instance();
-		$fb->_channel();
-	}
-
-	/**
 	 * Get an instance of the Singleton
 	 *
 	 * @return Archetype_Facebook
@@ -278,9 +268,8 @@ class Archetype_Facebook {
 	/**
 	 * Generate the output for the FB channel url
 	 *
-	 * @return [type] [description]
 	 */
-	private function _channel() {
+	public static function channel() {
 		include 'views/fb_channel.php';
 	}
 }
@@ -326,7 +315,7 @@ add_action( 'at_main_options_page', function( $options_page ) {
 /**
  * If the user has facebook set up their access token
  */
-add_action( 'init', function() {
+/*add_action( 'init', function() {
 	if ( $user = User::current_user() ) {
 		if( $user->has_facebook() ) {
 			$token = $user->get_meta( AT_FB_TOKEN_META, true );
@@ -334,7 +323,7 @@ add_action( 'init', function() {
 		}
 	}
 } );
-
+*/
 /**
  * Set a URL on the site for FB to use as its channel URL
  */
