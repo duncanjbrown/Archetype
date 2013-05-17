@@ -145,10 +145,10 @@ class User {
 	 * @param int     $id the id to get
 	 */
 	public static function get( $id ) {
-		if ( ! isset( self::$users[$id] ) )
-			self::$users[$id] = new User( $id );
+		if ( ! isset( static::$users[$id] ) )
+			static::$users[$id] = new static( $id );
 
-		return self::$users[$id];
+		return static::$users[$id];
 	}
 
 	/**

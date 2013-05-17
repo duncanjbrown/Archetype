@@ -53,10 +53,21 @@ class Archetype_Route {
 		add_filter( 'parse_request', array( &$this, 'try_match' ) ); 
 	}
 
+	/**
+	 * Get the regex for this rule
+	 * @return string 
+	 */
 	public function get_regex() {
 		return $this->regex;
 	}
 
+	/**
+	 * Attempt to match the regex against the request
+	 * & engage callbacks if it matches
+	 * 
+	 * @param  string $request 
+	 * @return bool
+	 */
 	public function try_match( $request ) {
 
 		if ( $this->regex == $request->matched_rule )

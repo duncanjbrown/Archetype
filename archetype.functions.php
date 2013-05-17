@@ -82,10 +82,11 @@ function at_get_string_mime_type( $string ) {
 /**
  * Get a POSTed value, checking if isset() beforehand
  * @param  string $key the POST key
+ * @param  mixed $default the default value to return if not found
  * @return mixed      $_POST value or null on no value present
  */
-function at_get_post_value( $key ) {
-	return isset( $_POST[$key] ) ? $_POST[$key] : null;
+function at_get_post_value( $key, $default = null ) {
+	return isset( $_POST[$key] ) ? $_POST[$key] : $default;
 }
 
 /**
