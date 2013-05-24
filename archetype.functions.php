@@ -112,6 +112,14 @@ function at_get_mime_type_ext( $mime_type ) {
 }
 
 /**
+ * Shorthand function to echo json
+ * @return string 
+ */
+function at_jsonify( $array ) {
+	echo json_encode( $array );
+}
+
+/**
  * Like get_template_part() put lets you pass args to the template file
  * Args are available in the tempalte as $template_args array
  * @param string filepart
