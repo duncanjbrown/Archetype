@@ -2,11 +2,11 @@ window.at_facebook = function( FB, $ ){
 
 	var clicked = undefined; // last clicked FB element
 	var signup = false;
+	var self = this;
 
 	function loginWithFacebook( facebookResponse ) {
 		var _clicked = clicked;
 		$( document ).trigger( 'ArchetypeFB_AJAXstart', _clicked );
-		console.log( 'ss' );
 		Archetype.post( 'fb_login', { response: facebookResponse }, function( result ) {
 			console.log('cc');
 			FB.api( '/me', function( userinfo ) {
@@ -55,17 +55,19 @@ window.at_facebook = function( FB, $ ){
 	 * Method fires whenever fb API call is made, 
 	 * to set state for receiving callback
 	 */
-	function contactFacebook( e ) {
+	this.contactFacebook = function( e ) {
 		clicked = e.target;
 		var scope = $( this ) .data( 'scope' );
 		FB.login( function() {}, { scope: scope } );
 	}
 
-	$( '.at_fb_login' ).click( contactFacebook );
-	$( '.at_fb_connect' ).click( contactFacebook );
-	$( '.at_fb_signup' ). click( function( e ) {
-		signup = true;
-		contactFacebook( e );
-	} );
+	$( document ).ready( function() {
+		$( '.at_fb_login' ).on( 'click', this.contactFacebook );
+		$( '.at_fb_connect' ).on( 'click', this.contactFacebook );
+		$( '.at_fb_signup' ).on( 'click', function( e ) {
+			signup = true;
+			self.contactFacebook( e );
+		} );		
+	});
 
 }

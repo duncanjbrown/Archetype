@@ -53,8 +53,9 @@ class Archetype_Form {
 	 * @param array $options
 	 */
 	function __construct( $form_name, $form_fields, $options = false ) {
-		
+
 		foreach( $form_fields as $field ) {
+			$field->form = $this;
 			$this->fields[$field->name] = $field;
 		}		
 
@@ -483,7 +484,7 @@ class Archetype_Form_Field {
 		if( $this->required() && !( $this->get_posted_value() ) )
 			$this->valid = false;
 		else 
-			$this->valid = call_user_func( $this->opts['validation'], $this->get_posted_value() );
+			$this->valid = call_user_func( $this->opts['validation'], $this->get_posted_value(), $this->form );
 	
 		return $this->valid;
 	}
