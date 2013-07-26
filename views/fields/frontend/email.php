@@ -1,0 +1,2 @@
+<label for="<?php echo $this->name; ?>"><?php echo $this->title; ?></label>
+<input class="<?php echo $this->get_classes(); ?>" <?php echo $this->readonly() ? 'readonly' : ''; ?> <?php echo $this->disabled() ? 'disabled' : ''; ?> data-error="<?php echo $this->get_error(); ?>" data-bind="value: <?php echo $this->name; ?>" <?php if( $this->opts['placeholder'] ) : ?>placeholder="<?php echo $this->opts['placeholder']; ?>"<?php endif; ?> name='<?php echo $this->name; ?>' size='30' type='email' value='<?php echo $this->get_value( null ); ?>' />
