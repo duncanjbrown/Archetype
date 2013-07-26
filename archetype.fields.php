@@ -666,6 +666,9 @@ function at_form( $form_name, $nonce ) {
 
 	$form = Archetype_Form::get( $form_name );
 
+	if( !$form )
+		return false;
+
 	// don't process the wrong form
 	// atm we use nonces to distinguish, this could be much better
 	if( !wp_verify_nonce( $_POST['_wpnonce'], $form->get_nonce() ) )
