@@ -68,7 +68,7 @@ class Archetype_Facebook {
 	 * @param  string $text    what to put on the button
 	 * @return void          
 	 */
-	public static function button( $context = 'login', $text = 'Login with Facebook' ) {
+	public static function button( $context = 'login', $text = 'Log In with Facebook' ) {
 		$text = apply_filters( 'at_fb_button', $text );
 		include 'views/fb_button.php';
 	}

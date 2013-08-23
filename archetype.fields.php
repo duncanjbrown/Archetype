@@ -480,6 +480,8 @@ class Archetype_Form_Field {
 	 */
 	function is_valid() {
 
+		error_log( print_r( $this->opts, true ) );
+
 		if( $this->required() && !( $this->get_posted_value() ) )
 			$this->valid = false;
 		else 

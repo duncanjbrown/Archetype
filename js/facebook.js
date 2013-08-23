@@ -3,12 +3,24 @@ window.at_facebook = function( FB, $ ){
 	var clicked = undefined; // last clicked FB element
 	var signup = false;
 
+	var processFBAuth = function(response) {
+		if( response.status === 'connected' && !Archetype.isUserLoggedIn() ) {
+			
+			if( signup ) {
+				signupWithFacebook( response );
+			} else {
+				loginWithFacebook( response );
+			}
+		
+		} else if( response.status === 'connected' ) {
+			connectWithFacebook( response );
+		}
+	};
+
 	function loginWithFacebook( facebookResponse ) {
 		var _clicked = clicked;
 		$( document ).trigger( 'ArchetypeFB_AJAXstart', _clicked );
-		console.log( 'ss' );
 		Archetype.post( 'fb_login', { response: facebookResponse }, function( result ) {
-			console.log('cc');
 			FB.api( '/me', function( userinfo ) {
 				console.log(userinfo);
 				$( document ).trigger( 'ArchetypeFB_AJAXstop', _clicked );
@@ -37,35 +49,23 @@ window.at_facebook = function( FB, $ ){
 		} );
 	}
 
-	FB.Event.subscribe('auth.authResponseChange', function(response) {
-		if( response.status === 'connected' && !Archetype.isUserLoggedIn() ) {
-			
-			if( signup ) {
-				signupWithFacebook( response );
-			} else {
-				loginWithFacebook( response );
-			}
-		
-		} else if( response.status === 'connected' ) {
-			connectWithFacebook( response );
-		}
-	});
-
+	FB.Event.subscribe('auth.authResponseChange', processFBAuth );
+	
 	/**
 	 * Method fires whenever fb API call is made, 
 	 * to set state for receiving callback
 	 */
 	function contactFacebook( e ) {
 		clicked = e.target;
-		var scope = $( this ) .data( 'scope' );
-		FB.login( function() {}, { scope: scope } );
+		var scope = $( this ).data( 'scope' );
+		FB.login( function() { }, { scope: scope } );
 	}
 
 	$( '.at_fb_login' ).click( contactFacebook );
 	$( '.at_fb_connect' ).click( contactFacebook );
 	$( '.at_fb_signup' ). click( function( e ) {
 		signup = true;
-		contactFacebook( e );
+		contactFacebook.call( this, e );
 	} );
 
 }
