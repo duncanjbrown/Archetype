@@ -394,7 +394,7 @@ add_action( 'at_user_created', function( $user ) {
  * Add scripts and styles
  */
 add_action( 'init', function() {
-	wp_enqueue_script( 'at_fb', AT_PLUGIN_URL . 'js/facebook.js' );
+	wp_enqueue_script( 'at_fb', AT_PLUGIN_URL . 'js/facebook.js', array(), false, false );
 	wp_enqueue_style( 'at_fb_css', AT_PLUGIN_URL . 'css/facebook.css' );
 } );
 

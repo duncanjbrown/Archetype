@@ -201,6 +201,8 @@ class Term {
 	protected $_term;
 
 	function __construct( $term ) {
+		if( !is_object( $term ) )
+			throw new Exception( 'Missing term object' );
 		$this->_term = $term;
 	}
 

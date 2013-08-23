@@ -2,6 +2,7 @@ window.at_facebook = function( FB, $ ){
 
 	var clicked = undefined; // last clicked FB element
 	var signup = false;
+	var self = this;
 
 	var processFBAuth = function(response) {
 		if( response.status === 'connected' && !Archetype.isUserLoggedIn() ) {
@@ -65,7 +66,7 @@ window.at_facebook = function( FB, $ ){
 	$( '.at_fb_connect' ).click( contactFacebook );
 	$( '.at_fb_signup' ). click( function( e ) {
 		signup = true;
-		contactFacebook.call( this, e );
+		contactFacebook( e );
 	} );
 
 }
