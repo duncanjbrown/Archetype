@@ -62,8 +62,12 @@ window.at_facebook = function( FB, $ ){
 	}
 
 	$( document ).ready( function() {
-		$( '.at_fb_login' ).on( 'click', this.contactFacebook );
-		$( '.at_fb_connect' ).on( 'click', this.contactFacebook );
+		$( '.at_fb_login' ).on( 'click', function(e) {
+			self.contactFacebook(e);
+		} );
+		$( '.at_fb_connect' ).on( 'click', function(e) {
+			self.contactFacebook(e);
+		} );
 		$( '.at_fb_signup' ).on( 'click', function( e ) {
 			signup = true;
 			self.contactFacebook( e );
