@@ -1,3 +1,1 @@
-.tn_message {padding: 10px; margin-bottom: 8px; }
-.tn_message.success {background-color: lightGreen; color: green; }
-.tn_message.error {background-color: pink; color: red; }
+.tn_message { padding: 1.2% 2.4%; text-align: center; margin: -1em 0 1em 0; background-color: #f2f2f2;  }

@@ -4,11 +4,24 @@
 	var signup = false;
 	var self = this;
 
+	var processFBAuth = function(response) {
+		if( response.status === 'connected' && !Archetype.isUserLoggedIn() ) {
+			
+			if( signup ) {
+				signupWithFacebook( response );
+			} else {
+				loginWithFacebook( response );
+			}
+		
+		} else if( response.status === 'connected' ) {
+			connectWithFacebook( response );
+		}
+	};
+
 	function loginWithFacebook( facebookResponse ) {
 		var _clicked = clicked;
 		$( document ).trigger( 'ArchetypeFB_AJAXstart', _clicked );
 		Archetype.post( 'fb_login', { response: facebookResponse }, function( result ) {
-			console.log('cc');
 			FB.api( '/me', function( userinfo ) {
 				console.log(userinfo);
 				$( document ).trigger( 'ArchetypeFB_AJAXstop', _clicked );
@@ -37,41 +50,23 @@
 		} );
 	}
 
-	FB.Event.subscribe('auth.authResponseChange', function(response) {
-		if( response.status === 'connected' && !Archetype.isUserLoggedIn() ) {
-			
-			if( signup ) {
-				signupWithFacebook( response );
-			} else {
-				loginWithFacebook( response );
-			}
-		
-		} else if( response.status === 'connected' ) {
-			connectWithFacebook( response );
-		}
-	});
-
+	FB.Event.subscribe('auth.authResponseChange', processFBAuth );
+	
 	/**
 	 * Method fires whenever fb API call is made, 
 	 * to set state for receiving callback
 	 */
-	this.contactFacebook = function( e ) {
+	function contactFacebook( e ) {
 		clicked = e.target;
-		var scope = $( this ) .data( 'scope' );
-		FB.login( function() {}, { scope: scope } );
+		var scope = $( this ).data( 'scope' );
+		FB.login( function() { }, { scope: scope } );
 	}
 
-	$( document ).ready( function() {
-		$( '.at_fb_login' ).on( 'click', function(e) {
-			self.contactFacebook(e);
-		} );
-		$( '.at_fb_connect' ).on( 'click', function(e) {
-			self.contactFacebook(e);
-		} );
-		$( '.at_fb_signup' ).on( 'click', function( e ) {
-			signup = true;
-			self.contactFacebook( e );
-		} );		
-	});
+	$( '.at_fb_login' ).click( contactFacebook );
+	$( '.at_fb_connect' ).click( contactFacebook );
+	$( '.at_fb_signup' ). click( function( e ) {
+		signup = true;
+		contactFacebook( e );
+	} );
 
 }
