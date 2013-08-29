@@ -9,11 +9,10 @@ define( 'TN_MESSAGES_URI', trailingslashit( plugin_dir_url( __FILE__ ) ) );
 define( 'TN_MESSAGES_PATH', trailingslashit( plugin_dir_path( __FILE__ ) ) );
 
 /**
- * Script and style
+ * Style
  */
 add_action( 'init', function() {
 	wp_enqueue_style( 'theme-notices-css', TN_MESSAGES_URI . 'css/theme-notices.css' );
-	wp_enqueue_script( 'theme-notices-js', TN_MESSAGES_URI . 'js/theme-notices.js', array( 'jquery' ), false, true );	
 });
 
 /**

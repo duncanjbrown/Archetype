@@ -9,8 +9,7 @@ define( 'AT_PLUGIN_URL', trailingslashit( plugin_dir_url( __FILE__ ) ) );
 
 add_action( 'init', function() {
 	wp_enqueue_script( 'jquery' );
-	wp_enqueue_script( 'archetype_js', AT_PLUGIN_URL . 'js/archetype.wp.js', array(), false, true );
-	wp_enqueue_script( 'kalendae', AT_PLUGIN_URL . 'js/lib/kalendae/kalendae.standalone.js', array(), false, true );
+	wp_enqueue_script( 'archetype_js', AT_PLUGIN_URL . 'js/archetype.min.js', array(), false, true );
 	wp_localize_script( 'archetype_js', '_Archetype', array( 
 		'ajaxurl' => admin_url( 'admin-ajax.php' ),
 		'shortinit' => AT_PLUGIN_URL . 'ajax/shortinit.php',

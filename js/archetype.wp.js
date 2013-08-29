@@ -1,4 +1,4 @@
-window.archetype = (function ( $ ) {
+;window.archetype = (function ( $ ) {
 
 	// private
     var ajaxurl = _Archetype.ajaxurl;

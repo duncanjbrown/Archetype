@@ -1,4 +1,4 @@
-window.at_facebook = function( FB, $ ){
+;window.at_facebook = function( FB, $ ){
 
 	var clicked = undefined; // last clicked FB element
 	var signup = false;
